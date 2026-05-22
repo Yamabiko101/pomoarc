@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "A lively Pomodoro TUI for focus sessions."
 license = "MIT"
-repository = "https://github.com/REPLACE_ME/pomolife"
+repository = "https://github.com/Yamabiko101/pomoarc"
 
 [[bin]]
 name = "pomolife"
