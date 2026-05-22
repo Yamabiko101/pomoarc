@@ -90,6 +90,12 @@ pub enum TaskCommand {
         tag: Option<String>,
     },
     List,
+    Complete {
+        title: String,
+    },
+    Delete {
+        title: String,
+    },
 }
 
 #[derive(Debug, Subcommand)]

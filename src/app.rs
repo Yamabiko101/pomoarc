@@ -49,6 +49,17 @@ pub fn handle_task(command: TaskCommand) -> Result<()> {
                 }
             }
         }
+        TaskCommand::Complete { title } => match store.complete_task(&title)? {
+            Some(task) => println!("Task completed: {}", task.title),
+            None => println!("Task not found: {title}"),
+        },
+        TaskCommand::Delete { title } => {
+            if store.delete_task(&title)? {
+                println!("Task deleted: {title}");
+            } else {
+                println!("Task not found: {title}");
+            }
+        }
     }
     Ok(())
 }
@@ -192,6 +203,12 @@ fn run_engine(
                         state.set_notes(latest_notes(&store)?);
                     }
                 }
+                tui::events::InputEvent::Input('c') if state.tab() == tui::Tab::Tasks => {
+                    if let Some(title) = selected_task_title(&state) {
+                        let _ = store.complete_task(&title)?;
+                        state.set_tasks(store.tasks()?);
+                    }
+                }
                 tui::events::InputEvent::Input('e') if state.tab() == tui::Tab::Notes => {
                     state.open_edit_latest_note();
                 }
@@ -199,6 +216,15 @@ fn run_engine(
                     if let Some(note) = state.notes().first() {
                         let _ = store.delete_note(note.id)?;
                         state.set_notes(latest_notes(&store)?);
+                    }
+                }
+                tui::events::InputEvent::Input('x') if state.tab() == tui::Tab::Tasks => {
+                    if let Some(title) = selected_task_title(&state) {
+                        let _ = store.delete_task(&title)?;
+                        state.set_tasks(store.tasks()?);
+                        if state.task() == title {
+                            state.set_task(None);
+                        }
                     }
                 }
                 tui::events::InputEvent::Mouse(x, y) => match state.mouse_action(x, y) {
@@ -210,6 +236,21 @@ fn run_engine(
                     Some(MouseAction::Help) => state.toggle_help(),
                     Some(MouseAction::Tab(tab)) => state.set_tab(tab),
                     Some(MouseAction::AddTask) => state.open_task_input(),
+                    Some(MouseAction::CompleteTask) => {
+                        if let Some(title) = selected_task_title(&state) {
+                            let _ = store.complete_task(&title)?;
+                            state.set_tasks(store.tasks()?);
+                        }
+                    }
+                    Some(MouseAction::DeleteTask) => {
+                        if let Some(title) = selected_task_title(&state) {
+                            let _ = store.delete_task(&title)?;
+                            state.set_tasks(store.tasks()?);
+                            if state.task() == title {
+                                state.set_task(None);
+                            }
+                        }
+                    }
                     Some(MouseAction::AddNote) => state.open_note_input(),
                     Some(MouseAction::CompleteNote) => {
                         if let Some(note) = state.notes().first() {
@@ -294,4 +335,14 @@ fn latest_notes(store: &JsonlStore) -> Result<Vec<crate::domain::note::Note>> {
     notes.sort_by_key(|note| std::cmp::Reverse(note.updated_at));
     notes.truncate(6);
     Ok(notes)
+}
+
+fn selected_task_title(state: &tui::UiState) -> Option<String> {
+    let active = state.task();
+    state
+        .tasks()
+        .iter()
+        .find(|task| task.title == active)
+        .or_else(|| state.tasks().first())
+        .map(|task| task.title.clone())
 }

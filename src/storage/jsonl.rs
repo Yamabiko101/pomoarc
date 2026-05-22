@@ -45,6 +45,28 @@ impl JsonlStore {
         self.read_jsonl(&self.tasks_path())
     }
 
+    pub fn complete_task(&self, title: &str) -> Result<Option<Task>> {
+        let mut tasks = self.tasks()?;
+        let mut completed = None;
+        for task in &mut tasks {
+            if task.title == title {
+                task.done = true;
+                completed = Some(task.clone());
+                break;
+            }
+        }
+        self.write_jsonl(&self.tasks_path(), &tasks)?;
+        Ok(completed)
+    }
+
+    pub fn delete_task(&self, title: &str) -> Result<bool> {
+        let mut tasks = self.tasks()?;
+        let before = tasks.len();
+        tasks.retain(|task| task.title != title);
+        self.write_jsonl(&self.tasks_path(), &tasks)?;
+        Ok(tasks.len() != before)
+    }
+
     pub fn add_note(&self, body: String) -> Result<Note> {
         let id = self
             .notes()?

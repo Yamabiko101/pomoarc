@@ -12,6 +12,8 @@ pub enum MouseAction {
     Help,
     Tab(Tab),
     AddTask,
+    CompleteTask,
+    DeleteTask,
     AddNote,
     CompleteNote,
     EditNote,

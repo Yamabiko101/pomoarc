@@ -102,6 +102,8 @@ pomoarc tui
 pomoarc start --profile micro
 pomoarc task add "Read paper" --tag reading
 pomoarc task list
+pomoarc task complete "Read paper"
+pomoarc task delete "Read paper"
 pomoarc note add "Clarify scope before next focus block"
 pomoarc note list
 pomoarc note complete 1
@@ -130,10 +132,10 @@ pomoarc sound test
 | `t` | Next theme |
 | `m` | Next tab |
 | `a` | Next ASCII font |
-| `i` | Add task or note in the active tab |
-| `c` | Complete latest note |
+| `i` | Add task, note, or event in the active tab |
+| `c` | Complete active task or latest note |
 | `e` | Edit latest note |
-| `x` | Delete latest note |
+| `x` | Delete active task or latest note |
 | `+` | Add 1 minute |
 | `-` | Remove 1 minute |
 | `Tab` | Next panel |
@@ -146,7 +148,8 @@ Clickable areas:
 - Footer controls: Start, Pause, Reset, Skip, Theme, Help.
 - Top tabs: Timer, Tasks, Notes, Stats, Event, Settings.
 - Task rows to activate a task.
-- Add/Edit/Delete buttons in Tasks and Notes.
+- Add/Complete/Delete buttons in Tasks.
+- Add/Complete/Edit/Delete buttons in Notes.
 - Set Event button in the Event tab.
 
 Disable mouse input:
@@ -213,6 +216,17 @@ Future image slots:
 | `themes-strip.png` | Theme comparison |
 | `garden-states.png` | Focus Garden progression |
 | `compact-mode.png` | Small terminal fallback |
+
+## Tasks
+
+```bash
+pomoarc task add "Read paper" --tag reading
+pomoarc task list
+pomoarc task complete "Read paper"
+pomoarc task delete "Read paper"
+```
+
+The TUI includes a Tasks tab with buttons for add, complete, and delete. Click a task row to make it active.
 
 ## Notes
 

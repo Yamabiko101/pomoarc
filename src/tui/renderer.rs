@@ -555,27 +555,33 @@ fn render_tasks(frame: &mut Frame, state: &mut UiState, area: Rect) {
         .split(area);
     let buttons = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([Constraint::Length(14), Constraint::Min(10)])
+        .constraints([
+            Constraint::Length(14),
+            Constraint::Length(14),
+            Constraint::Length(14),
+            Constraint::Min(10),
+        ])
         .split(sections[0]);
-    frame.render_widget(
-        Paragraph::new("Add task")
-            .block(
-                Block::default()
-                    .borders(Borders::ALL)
-                    .border_style(Style::default().fg(theme.accent))
-                    .style(Style::default().bg(theme.background)),
-            )
-            .style(
-                Style::default()
-                    .fg(theme.accent)
-                    .add_modifier(Modifier::BOLD),
-            )
-            .alignment(Alignment::Center),
-        buttons[0],
-    );
-    state
-        .mouse_zones_mut()
-        .add(buttons[0], MouseAction::AddTask);
+    let button_specs = [
+        ("Add task", MouseAction::AddTask, theme.accent),
+        ("Complete", MouseAction::CompleteTask, theme.accent),
+        ("Delete", MouseAction::DeleteTask, theme.danger),
+    ];
+    for (index, (label, action, fg)) in button_specs.iter().enumerate() {
+        frame.render_widget(
+            Paragraph::new(*label)
+                .block(
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .border_style(Style::default().fg(*fg))
+                        .style(Style::default().bg(theme.background)),
+                )
+                .style(Style::default().fg(*fg).add_modifier(Modifier::BOLD))
+                .alignment(Alignment::Center),
+            buttons[index],
+        );
+        state.mouse_zones_mut().add(buttons[index], *action);
+    }
 
     let mut lines = vec![
         Line::styled(
@@ -592,6 +598,14 @@ fn render_tasks(frame: &mut Frame, state: &mut UiState, area: Rect) {
             Span::styled("add ", Style::default().fg(theme.accent)),
             Span::raw("click Add task or press i"),
         ]),
+        Line::from(vec![
+            Span::styled("complete ", Style::default().fg(theme.accent)),
+            Span::raw("click Complete or press c"),
+        ]),
+        Line::from(vec![
+            Span::styled("delete ", Style::default().fg(theme.danger)),
+            Span::raw("click Delete or press x"),
+        ]),
         Line::raw(""),
     ];
 
@@ -603,15 +617,22 @@ fn render_tasks(frame: &mut Frame, state: &mut UiState, area: Rect) {
     } else {
         let tasks = state.tasks().to_vec();
         for (index, task) in tasks.iter().enumerate() {
+            let marker = if task.done { "[x]" } else { "[ ]" };
+            let title_style = if task.done {
+                Style::default().fg(theme.muted)
+            } else {
+                Style::default().fg(theme.foreground)
+            };
             lines.push(Line::from(vec![
                 Span::styled("▸ ", Style::default().fg(theme.accent)),
-                Span::raw(task.title.clone()),
+                Span::styled(format!("{marker} "), Style::default().fg(theme.accent)),
+                Span::styled(task.title.clone(), title_style),
                 Span::styled(
                     format!("  ({})", task.tag),
                     Style::default().fg(theme.muted),
                 ),
             ]));
-            let row_y = sections[1].y + 5 + index as u16;
+            let row_y = sections[1].y + 7 + index as u16;
             if row_y < sections[1].y.saturating_add(sections[1].height) {
                 state.mouse_zones_mut().add(
                     Rect::new(sections[1].x, row_y, sections[1].width, 1),
@@ -637,7 +658,7 @@ fn render_tasks(frame: &mut Frame, state: &mut UiState, area: Rect) {
 }
 
 fn render_help(frame: &mut Frame, area: Rect) {
-    let text = "Space pause/resume\ns start\nr reset\nn next phase\nq quit\n? help\nt theme\nm tab/mode\na ASCII font\ni add task/note/event in current tab\nc complete latest note\ne edit latest note\nx delete latest note\n+ add minute\n- remove minute\nTab next panel\nMouse: click buttons, tabs, and task rows";
+    let text = "Space pause/resume\ns start\nr reset\nn next phase\nq quit\n? help\nt theme\nm tab/mode\na ASCII font\ni add task/note/event in current tab\nc complete task/note\ne edit latest note\nx delete task/note\n+ add minute\n- remove minute\nTab next panel\nMouse: click buttons, tabs, and task rows";
     frame.render_widget(Clear, area);
     frame.render_widget(
         Paragraph::new(text)
