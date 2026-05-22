@@ -2,93 +2,151 @@
 
 # pomoarc
 
-**A quiet, polished Pomodoro TUI with Apple-like calm, Omarchy terminal energy, and Nothing-style restraint.**
+**A terminal-first focus system for people who live inside the shell.**
 
-`Rust` · `Ratatui` · `Crossterm` · `macOS-first` · `keyboard + mouse`
+Omarchy-coded · dark-mode native · keyboard driven · local-first · built in Rust
+
+![Rust](https://img.shields.io/badge/Rust-111111?style=for-the-badge&logo=rust&logoColor=white)
+![Ratatui](https://img.shields.io/badge/Ratatui-7fbbb3?style=for-the-badge&labelColor=111111)
+![macOS](https://img.shields.io/badge/macOS-1e1e2e?style=for-the-badge&logo=apple&logoColor=cdd6f4)
+![Private Build](https://img.shields.io/badge/private_build-pomoarc-a6e3a1?style=for-the-badge&labelColor=111111)
 
 ```text
-┌────────────────────────────────────────────────────────────────────┐
-│ pomoarc                                                    25:00   │
-├────────────────────────────────────────────────────────────────────┤
-│                                                                    │
-│        ████  █████        ███   ███                               │
-│            █ █       █   █   █ █   █                              │
-│         ███  ████        █   █ █   █                              │
-│        █         █   █   █   █ █   █                              │
-│        █████ ████         ███   ███                               │
-│                                                                    │
-│        [████████████░░░░░░░░░░░░░░░░] 48%                          │
-│                                                                    │
-│        focus garden      .                                         │
-│        active task       Write README                              │
-│        theme             catppuccin-mocha                          │
-│                                                                    │
-└────────────────────────────────────────────────────────────────────┘
+╭────────────────────────────── pomoarc ──────────────────────────────╮
+│ mode: focus       profile: deep-work       theme: everforest-dark    │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│      ██████╗  ██████╗ ███╗   ███╗ ██████╗  █████╗ ██████╗  ██████╗ │
+│      ██╔══██╗██╔═══██╗████╗ ████║██╔═══██╗██╔══██╗██╔══██╗██╔════╝ │
+│      ██████╔╝██║   ██║██╔████╔██║██║   ██║███████║██████╔╝██║      │
+│      ██╔═══╝ ██║   ██║██║╚██╔╝██║██║   ██║██╔══██║██╔══██╗██║      │
+│      ██║     ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██║  ██║██║  ██║╚██████╗ │
+│      ╚═╝      ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ │
+│                                                                      │
+│                         25:00                                        │
+│              [██████████████▓▓▓▓▒▒▒▒░░░░] 62%                       │
+│                                                                      │
+│   task       write the thing                                         │
+│   ritual     breathe / lock in / ship                                │
+│   garden     .  |  \|/  \|/_                                         │
+│   controls   s start · space pause · n skip · t theme · q quit       │
+╰──────────────────────────────────────────────────────────────────────╯
 ```
 
-[Install](#install) · [Use](#quick-use) · [Themes](#themes) · [Development](#development) · [Roadmap](#roadmap)
+`pomolife` today. `pomoarc` as the product identity.
+
+[Install](#install) · [Run It](#run-it-on-your-mac) · [Themes](#theme-system) · [Controls](#controls) · [Roadmap](#roadmap)
 
 </div>
 
-## Mood
+## Terminal Moodboard
 
-pomoarc is a terminal focus companion, not a productivity dashboard shouting at you.
+pomoarc should feel less like a calendar app and more like a tuned workstation:
 
-It aims for:
+```text
+black glass        #111111  ████████████████████
+everforest green   #a7c080  ████████████░░░░░░░░
+catppuccin blue    #89b4fa  ██████████████░░░░░░
+signal pink        #f5c2e7  ████████░░░░░░░░░░░░
+warning amber      #f9e2af  ██████████░░░░░░░░░░
+```
 
-- **Calm by default**: readable, low-friction, no visual noise.
-- **Terminal-native charm**: ASCII timer, keyboard flow, mouse when available.
-- **Small rituals**: cycles, garden progress, a simple mascot, session stats.
-- **Serious tooling**: real CLI commands, local config, tests, installable binary.
+Design language:
+
+- **Omarchy over Apple**: sharper, darker, more terminal-native.
+- **No fake productivity theater**: just a timer, rhythm, keyboard flow and local stats.
+- **Neon where it matters**: progress, state, theme, warnings.
+- **ASCII as texture**: timers, garden, mascot, motion frames.
+- **Private tool energy**: compact, opinionated, hackable.
+
+## Motion Language
+
+The README cannot animate the terminal, so this is the intended feel:
+
+```text
+frame 01  [██████████░░░░░░░░░░]  focus
+frame 02  [██████████▓░░░░░░░░░]  focus
+frame 03  [██████████▒▒░░░░░░░░]  focus
+frame 04  [██████████░░░░░░░░░░]  focus
+```
+
+Inside the app, animations are intentionally low-power and can be disabled:
+
+```bash
+pomolife --no-animations
+```
 
 ## What Works Now
 
-| Area | Status |
+| System | Current state |
 | --- | --- |
-| Pomodoro TUI | Implemented |
-| Start, pause/resume, reset, skip, quit | Implemented |
-| CLI commands | Implemented |
-| Themes | 10 built in |
-| ASCII timer | Implemented with compact fallback |
-| Mouse support | Basic click zones |
+| TUI Pomodoro | Start, pause/resume, reset, skip, quit |
+| Terminal UI | Ratatui layout, ASCII timer, progress bar |
+| Keyboard | Full first-pass control map |
+| Mouse | Basic clickable tabs and footer controls |
+| Themes | 10 built-in palettes |
+| Fonts | 8 font names with compact fallback |
+| Profiles | `default`, `deep-work`, `micro` |
 | Config | TOML, platform app path |
-| Stats | JSONL-backed summary and JSON export |
-| Tasks | CLI add/list |
-| macOS notifications | `terminal-notifier` or `osascript` fallback |
-| Sound | `afplay` fallback |
+| Storage | JSONL sessions and tasks |
+| Stats | Text and JSON summary |
+| macOS | Notifications and sound fallbacks |
 
 Experimental:
 
-- Stats, tasks and settings tabs inside the TUI are informational first versions.
+- TUI tabs for stats/tasks/settings are informational first versions.
 - Theme and font switching inside the TUI is session-local.
-- Focus Garden and mascot visuals are intentionally simple in this release.
-- SQLite, ritual mode, hooks and richer ambient scenes are roadmap items.
+- Focus Garden and mascot visuals are simple seeds, ready for richer animation.
+- SQLite, ritual mode, hooks and ambient backgrounds are next-phase work.
 
-## Install
+## Run It On Your Mac
 
-Install Rust if needed:
+The binary is already installed on this machine.
 
-```bash
-brew install rust
-```
-
-Build and install from the repo:
-
-```bash
-cargo install --path .
-pomolife
-```
-
-The installed command is currently:
+Run the TUI:
 
 ```bash
 pomolife
 ```
 
-If your shell cannot find it:
+Or explicitly:
+
+```bash
+pomolife tui
+```
+
+Useful first commands:
+
+```bash
+pomolife --help
+pomolife start --profile deep-work --task "Build pomoarc"
+pomolife themes list
+pomolife themes set everforest-dark
+pomolife stats --json
+```
+
+If a fresh terminal cannot find `pomolife`, add Cargo's bin directory to your shell:
 
 ```bash
 export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+On this machine I also linked it at:
+
+```text
+/opt/homebrew/bin/pomolife
+```
+
+## Install
+
+From source:
+
+```bash
+brew install rust
+git clone https://github.com/Yamabiko101/pomoarc.git
+cd pomoarc
+cargo install --path .
+pomolife
 ```
 
 ## Quick Use
@@ -122,7 +180,7 @@ pomolife notify --test
 pomolife sound test
 ```
 
-## Keyboard
+## Controls
 
 | Key | Action |
 | --- | --- |
@@ -140,8 +198,6 @@ pomolife sound test
 | `Tab` | Next panel |
 | `Esc` | Quit / close modal |
 
-## Mouse
-
 Mouse support is enabled by default when the terminal supports it.
 
 Clickable areas:
@@ -156,16 +212,16 @@ Disable mouse input:
 mouse = false
 ```
 
-## Themes
+## Theme System
 
-pomoarc ships with calm, readable terminal palettes:
+Built-in palettes:
 
-| Family | Themes |
-| --- | --- |
-| Gruvbox | `gruvbox-dark`, `gruvbox-light` |
-| Everforest | `everforest-dark`, `everforest-light` |
-| Catppuccin | `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `catppuccin-latte` |
-| Utility | `monochrome`, `high-contrast` |
+| Family | Themes | Vibe |
+| --- | --- | --- |
+| Gruvbox | `gruvbox-dark`, `gruvbox-light` | warm terminal classic |
+| Everforest | `everforest-dark`, `everforest-light` | Omarchy garden mode |
+| Catppuccin | `mocha`, `macchiato`, `frappe`, `latte` | soft neon workstation |
+| Utility | `monochrome`, `high-contrast` | no-distraction mode |
 
 Preview and set:
 
@@ -174,10 +230,13 @@ pomolife themes preview catppuccin-mocha
 pomolife themes set everforest-dark
 ```
 
+Palette strip:
+
 ```text
-catppuccin-mocha  #1e1e2e  #cdd6f4  #89b4fa  #a6e3a1
-everforest-dark   #2d353b  #d3c6aa  #7fbbb3  #a7c080
-gruvbox-dark      #282828  #ebdbb2  #83a598  #b8bb26
+everforest-dark   bg #2d353b  fg #d3c6aa  primary #7fbbb3  grow #a7c080
+catppuccin-mocha  bg #1e1e2e  fg #cdd6f4  primary #89b4fa  grow #a6e3a1
+gruvbox-dark      bg #282828  fg #ebdbb2  primary #83a598  grow #b8bb26
+high-contrast     bg #000000  fg #ffffff  primary #00ffff  grow #00ff00
 ```
 
 ## ASCII Fonts
@@ -239,7 +298,7 @@ Example values:
 
 ```toml
 [visuals]
-theme = "catppuccin-mocha"
+theme = "everforest-dark"
 font = "digital"
 animations = true
 ambient_background = "none"
@@ -367,10 +426,11 @@ pomolife --font tiny
 Next layers of polish:
 
 - Rename the binary from `pomolife` to `pomoarc` once the product name fully settles.
+- Richer Omarchy-style ambient backgrounds: stars, rain, garden, scanline, matrix.
+- Animated focus garden states and sharper mascot frames.
 - SQLite backend and migrations.
 - Full task picker and profile picker inside the TUI.
 - Ritual mode with energy check-in, intention and micro-journaling.
-- Ambient backgrounds: stars, rain, garden, matrix and waves.
 - External theme files and theme validation.
 - Snapshot tests for small terminals.
 - Homebrew tap packaging.
