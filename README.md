@@ -12,7 +12,7 @@ Terminal-native · keyboard-first · local-only · built in Rust
 ![Local First](https://img.shields.io/badge/Local_First-a6e3a1?style=for-the-badge&labelColor=111111)
 
 ```text
-╭────────────────────────────── pomoarc ──────────────────────────────╮
+╭────────────────────────────── pomoarc ───────────────────────────────╮
 │ mode: focus       profile: deep-work       theme: everforest-dark    │
 ├──────────────────────────────────────────────────────────────────────┤
 │                                                                      │
