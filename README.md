@@ -2,13 +2,14 @@
 
 # pomoarc
 
-**A terminal-first focus system for people who live inside the shell.**
+**A dark terminal focus system for people who tune their workstation like a living environment.**
 
-Omarchy-coded · dark-mode native · keyboard driven · local-first · built in Rust
+Omarchy-coded · terminal-native · keyboard-first · local-only · built in Rust
 
 ![Rust](https://img.shields.io/badge/Rust-111111?style=for-the-badge&logo=rust&logoColor=white)
 ![Ratatui](https://img.shields.io/badge/Ratatui-7fbbb3?style=for-the-badge&labelColor=111111)
-![macOS](https://img.shields.io/badge/macOS-1e1e2e?style=for-the-badge&logo=apple&logoColor=cdd6f4)
+![Omarchy](https://img.shields.io/badge/Omarchy-2d353b?style=for-the-badge&labelColor=111111&logoColor=a7c080)
+![Terminal](https://img.shields.io/badge/Terminal-1e1e2e?style=for-the-badge&logo=gnometerminal&logoColor=a6e3a1)
 ![Private Build](https://img.shields.io/badge/private_build-pomoarc-a6e3a1?style=for-the-badge&labelColor=111111)
 
 ```text
@@ -23,51 +24,52 @@ Omarchy-coded · dark-mode native · keyboard driven · local-first · built in 
 │      ██║     ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██║  ██║██║  ██║╚██████╗ │
 │      ╚═╝      ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ │
 │                                                                      │
-│                         25:00                                        │
+│                  25:00        scanline: soft                         │
 │              [██████████████▓▓▓▓▒▒▒▒░░░░] 62%                       │
 │                                                                      │
-│   task       write the thing                                         │
-│   ritual     breathe / lock in / ship                                │
-│   garden     .  |  \|/  \|/_                                         │
+│   task       write the thing         state      locked in             │
+│   ritual     breathe / choose / ship  energy     steady               │
+│   garden     .  |  \|/  \|/_         signal     green                │
 │   controls   s start · space pause · n skip · t theme · q quit       │
 ╰──────────────────────────────────────────────────────────────────────╯
 ```
 
 `pomolife` today. `pomoarc` as the product identity.
 
-[Install](#install) · [Run It](#run-it-on-your-mac) · [Themes](#theme-system) · [Controls](#controls) · [Roadmap](#roadmap)
+[Install](#install) · [Themes](#theme-system) · [Controls](#controls) · [Visual Direction](#visual-direction) · [Roadmap](#roadmap)
 
 </div>
 
 ## Terminal Moodboard
 
-pomoarc should feel less like a calendar app and more like a tuned workstation:
+pomoarc should feel less like a calendar app and more like a tuned terminal rice:
 
 ```text
-black glass        #111111  ████████████████████
-everforest green   #a7c080  ████████████░░░░░░░░
-catppuccin blue    #89b4fa  ██████████████░░░░░░
-signal pink        #f5c2e7  ████████░░░░░░░░░░░░
-warning amber      #f9e2af  ██████████░░░░░░░░░░
+black glass        #111111  ████████████████████  base
+everforest green   #a7c080  ████████████░░░░░░░░  growth
+terminal teal      #7fbbb3  ██████████████░░░░░░  focus
+signal pink        #f5c2e7  ████████░░░░░░░░░░░░  accent
+warning amber      #f9e2af  ██████████░░░░░░░░░░  break
+danger red         #f38ba8  ██████░░░░░░░░░░░░░░  skip
 ```
 
 Design language:
 
-- **Omarchy over Apple**: sharper, darker, more terminal-native.
-- **No fake productivity theater**: just a timer, rhythm, keyboard flow and local stats.
-- **Neon where it matters**: progress, state, theme, warnings.
-- **ASCII as texture**: timers, garden, mascot, motion frames.
-- **Private tool energy**: compact, opinionated, hackable.
+- **Omarchy first**: sharp borders, dark surfaces, terminal color, no soft landing-page gloss.
+- **Riced but useful**: visual detail only where it helps focus.
+- **Neon signal, not decoration**: progress, active state, warning, theme and completion.
+- **ASCII as atmosphere**: timer glyphs, garden frames, mascot states and subtle motion.
+- **Hackable private tool energy**: compact, opinionated, local, easy to fork.
 
 ## Motion Language
 
-The README cannot animate the terminal, so this is the intended feel:
+The README cannot animate the terminal, so this is the intended terminal pulse:
 
 ```text
-frame 01  [██████████░░░░░░░░░░]  focus
-frame 02  [██████████▓░░░░░░░░░]  focus
-frame 03  [██████████▒▒░░░░░░░░]  focus
-frame 04  [██████████░░░░░░░░░░]  focus
+tick 001  [██████████░░░░░░░░░░]  focus  signal: green
+tick 002  [██████████▓░░░░░░░░░]  focus  signal: green
+tick 003  [██████████▒▒░░░░░░░░]  focus  signal: green
+tick 004  [██████████░░░░░░░░░░]  focus  signal: green
 ```
 
 Inside the app, animations are intentionally low-power and can be disabled:
@@ -98,44 +100,6 @@ Experimental:
 - Theme and font switching inside the TUI is session-local.
 - Focus Garden and mascot visuals are simple seeds, ready for richer animation.
 - SQLite, ritual mode, hooks and ambient backgrounds are next-phase work.
-
-## Run It On Your Mac
-
-The binary is already installed on this machine.
-
-Run the TUI:
-
-```bash
-pomolife
-```
-
-Or explicitly:
-
-```bash
-pomolife tui
-```
-
-Useful first commands:
-
-```bash
-pomolife --help
-pomolife start --profile deep-work --task "Build pomoarc"
-pomolife themes list
-pomolife themes set everforest-dark
-pomolife stats --json
-```
-
-If a fresh terminal cannot find `pomolife`, add Cargo's bin directory to your shell:
-
-```bash
-export PATH="$HOME/.cargo/bin:$PATH"
-```
-
-On this machine I also linked it at:
-
-```text
-/opt/homebrew/bin/pomolife
-```
 
 ## Install
 
@@ -238,6 +202,28 @@ catppuccin-mocha  bg #1e1e2e  fg #cdd6f4  primary #89b4fa  grow #a6e3a1
 gruvbox-dark      bg #282828  fg #ebdbb2  primary #83a598  grow #b8bb26
 high-contrast     bg #000000  fg #ffffff  primary #00ffff  grow #00ff00
 ```
+
+## Visual Direction
+
+Planned presentation layers for the TUI:
+
+```text
+╭─ focus surface ─────────────────────────────────────╮
+│  dense, dark, clear hierarchy                       │
+│  active region uses green/teal signal color          │
+│  breaks use amber, skips/errors use red              │
+│  optional low-power scanline/progress pulse          │
+╰─────────────────────────────────────────────────────╯
+```
+
+Future image slots:
+
+| Slot | Purpose |
+| --- | --- |
+| `hero-terminal.png` | Main TUI screenshot |
+| `themes-strip.png` | Theme comparison |
+| `garden-states.png` | Focus Garden progression |
+| `compact-mode.png` | Small terminal fallback |
 
 ## ASCII Fonts
 
