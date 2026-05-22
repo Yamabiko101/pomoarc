@@ -406,17 +406,3 @@ pomoarc sound test
 pomoarc --font tiny
 ```
 
-## Roadmap
-
-- Richer ambient backgrounds: stars, rain, garden, scanline, matrix.
-- Animated focus garden states and sharper mascot frames.
-- SQLite backend and migrations.
-- Full task picker and profile picker inside the TUI.
-- Ritual mode with energy check-in, intention and micro-journaling.
-- External theme files and theme validation.
-- Snapshot tests for small terminals.
-- Homebrew tap packaging.
-
-## Contributing
-
-Keep the timer engine independent from Ratatui, keep the TUI responsive, and run the development checks before opening a PR.
