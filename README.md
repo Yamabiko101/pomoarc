@@ -1,52 +1,91 @@
-# Pomolife
+<div align="center">
 
-Pomolife is a lively Pomodoro terminal app for macOS, built with Rust, Ratatui and Crossterm.
+# pomoarc
+
+**A quiet, polished Pomodoro TUI with Apple-like calm, Omarchy terminal energy, and Nothing-style restraint.**
+
+`Rust` · `Ratatui` · `Crossterm` · `macOS-first` · `keyboard + mouse`
 
 ```text
-████  ████  █   █  ████  █     █ ████ ████
-█  █  █  █  ██ ██  █  █  █     █ █    █
-████  █  █  █ █ █  █  █  █     █ ███  ███
-█     █  █  █   █  █  █  █     █ █    █
-█     ████  █   █  ████  ████  █ █    ████
+┌────────────────────────────────────────────────────────────────────┐
+│ pomoarc                                                    25:00   │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│        ████  █████        ███   ███                               │
+│            █ █       █   █   █ █   █                              │
+│         ███  ████        █   █ █   █                              │
+│        █         █   █   █   █ █   █                              │
+│        █████ ████         ███   ███                               │
+│                                                                    │
+│        [████████████░░░░░░░░░░░░░░░░] 48%                          │
+│                                                                    │
+│        focus garden      .                                         │
+│        active task       Write README                              │
+│        theme             catppuccin-mocha                          │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
-## Status
+[Install](#install) · [Use](#quick-use) · [Themes](#themes) · [Development](#development) · [Roadmap](#roadmap)
 
-Implemented in this release:
+</div>
 
-- Pomodoro TUI with start, pause/resume, reset, skip and quit.
-- CLI commands for `start`, `tui`, `countdown`, `stopwatch`, `event`, `stats`, `config`, `themes`, `task`, `notify` and `sound`.
-- Timer domain tests.
-- Ten built-in themes: Gruvbox, Everforest, Catppuccin, Monochrome and High Contrast.
-- ASCII timer fonts with compact fallback.
-- Mouse click zones for tabs and main controls when the terminal supports mouse events.
-- Local config at the platform app config path.
-- JSONL session/task persistence and stats export.
-- macOS notification fallback through `terminal-notifier` or `osascript`, and sound through `afplay`.
+## Mood
 
-Experimental in this release:
+pomoarc is a terminal focus companion, not a productivity dashboard shouting at you.
 
-- TUI tabs for stats/tasks/settings are informational.
-- Theme/font switching in the TUI is in-memory for the active session.
-- Focus Garden, mascot and ambient visuals are simple first versions.
-- SQLite backend and hooks are documented as roadmap; storage currently uses JSONL.
+It aims for:
+
+- **Calm by default**: readable, low-friction, no visual noise.
+- **Terminal-native charm**: ASCII timer, keyboard flow, mouse when available.
+- **Small rituals**: cycles, garden progress, a simple mascot, session stats.
+- **Serious tooling**: real CLI commands, local config, tests, installable binary.
+
+## What Works Now
+
+| Area | Status |
+| --- | --- |
+| Pomodoro TUI | Implemented |
+| Start, pause/resume, reset, skip, quit | Implemented |
+| CLI commands | Implemented |
+| Themes | 10 built in |
+| ASCII timer | Implemented with compact fallback |
+| Mouse support | Basic click zones |
+| Config | TOML, platform app path |
+| Stats | JSONL-backed summary and JSON export |
+| Tasks | CLI add/list |
+| macOS notifications | `terminal-notifier` or `osascript` fallback |
+| Sound | `afplay` fallback |
+
+Experimental:
+
+- Stats, tasks and settings tabs inside the TUI are informational first versions.
+- Theme and font switching inside the TUI is session-local.
+- Focus Garden and mascot visuals are intentionally simple in this release.
+- SQLite, ritual mode, hooks and richer ambient scenes are roadmap items.
 
 ## Install
 
-Install Rust first if needed:
+Install Rust if needed:
 
 ```bash
 brew install rust
 ```
 
-Then build and install:
+Build and install from the repo:
 
 ```bash
 cargo install --path .
 pomolife
 ```
 
-If `pomolife` is not found after install, ensure Cargo's bin directory is in your shell path:
+The installed command is currently:
+
+```bash
+pomolife
+```
+
+If your shell cannot find it:
 
 ```bash
 export PATH="$HOME/.cargo/bin:$PATH"
@@ -65,7 +104,7 @@ pomolife stats
 pomolife stats --json
 ```
 
-## Commands
+## Command Map
 
 ```bash
 pomolife --help
@@ -103,9 +142,14 @@ pomolife sound test
 
 ## Mouse
 
-Mouse support is enabled by default and depends on the terminal emulator. Click the footer controls for Start, Pause, Reset, Skip, Theme and Help, or click the top tabs.
+Mouse support is enabled by default when the terminal supports it.
 
-Disable it in config:
+Clickable areas:
+
+- Footer controls: Start, Pause, Reset, Skip, Theme, Help.
+- Top tabs: Timer, Stats, Tasks, Settings.
+
+Disable mouse input:
 
 ```toml
 [input]
@@ -114,20 +158,29 @@ mouse = false
 
 ## Themes
 
-Available themes:
+pomoarc ships with calm, readable terminal palettes:
 
-- `gruvbox-dark`
-- `gruvbox-light`
-- `everforest-dark`
-- `everforest-light`
-- `catppuccin-mocha`
-- `catppuccin-macchiato`
-- `catppuccin-frappe`
-- `catppuccin-latte`
-- `monochrome`
-- `high-contrast`
+| Family | Themes |
+| --- | --- |
+| Gruvbox | `gruvbox-dark`, `gruvbox-light` |
+| Everforest | `everforest-dark`, `everforest-light` |
+| Catppuccin | `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `catppuccin-latte` |
+| Utility | `monochrome`, `high-contrast` |
 
-## Fonts
+Preview and set:
+
+```bash
+pomolife themes preview catppuccin-mocha
+pomolife themes set everforest-dark
+```
+
+```text
+catppuccin-mocha  #1e1e2e  #cdd6f4  #89b4fa  #a6e3a1
+everforest-dark   #2d353b  #d3c6aa  #7fbbb3  #a7c080
+gruvbox-dark      #282828  #ebdbb2  #83a598  #b8bb26
+```
+
+## ASCII Fonts
 
 Available font names:
 
@@ -148,6 +201,20 @@ pomolife --font tiny
 
 Small terminals automatically fall back to a compact timer.
 
+## Profiles
+
+Built-in focus rhythms:
+
+| Profile | Focus | Short break | Long break | Long break every |
+| --- | ---: | ---: | ---: | ---: |
+| `default` | 25m | 5m | 15m | 4 |
+| `deep-work` | 50m | 10m | 25m | 3 |
+| `micro` | 10m | 2m | 8m | 5 |
+
+```bash
+pomolife start --profile deep-work
+```
+
 ## Config
 
 Print the config path:
@@ -162,21 +229,29 @@ On macOS this uses the system application config directory through the `director
 ~/Library/Application Support/dev.Pomolife.pomolife/config.toml
 ```
 
-For isolated development or tests, override local app state:
+For isolated development or tests:
 
 ```bash
 POMOLIFE_HOME=.pomolife-dev pomolife config path
 ```
 
-Profiles included by default:
+Example values:
 
-- `default`: 25/5/15, long break every 4 focus sessions.
-- `deep-work`: 50/10/25, long break every 3 focus sessions.
-- `micro`: 10/2/8, long break every 5 focus sessions.
+```toml
+[visuals]
+theme = "catppuccin-mocha"
+font = "digital"
+animations = true
+ambient_background = "none"
+
+[input]
+mouse = true
+vim_keys = true
+```
 
 ## Stats
 
-Pomolife stores sessions and tasks as JSONL in the platform data directory.
+pomoarc stores sessions and tasks as JSONL in the platform data directory.
 
 ```bash
 pomolife stats
@@ -185,11 +260,19 @@ pomolife stats --week
 pomolife stats --json
 ```
 
-Stats include today's completed pomodoros, focus minutes, streak, best hour, frequent task, tag totals and a 7-day ASCII chart.
+Stats include:
+
+- Pomodoros completed today.
+- Focus minutes today.
+- Daily streak.
+- Best hour.
+- Most frequent task.
+- Tag totals.
+- Last 7 days as an ASCII chart.
 
 ## macOS Notifications
 
-Pomolife tries:
+Completion notifications try, in order:
 
 1. `terminal-notifier`, when installed.
 2. `osascript` notification fallback.
@@ -200,6 +283,12 @@ Sound uses `afplay` with system sounds.
 ```bash
 pomolife notify --test
 pomolife sound test
+```
+
+Optional:
+
+```bash
+brew install terminal-notifier
 ```
 
 ## Development
@@ -215,6 +304,18 @@ cargo run -- stats --json
 cargo install --path .
 ```
 
+Architecture:
+
+```text
+src/
+  cli.rs          command surface
+  config.rs       TOML config and platform paths
+  domain/         timer, profiles, sessions, tasks, stats
+  storage/        JSONL persistence
+  tui/            Ratatui renderer, events, mouse, themes, ASCII
+  notifications/  macOS sound and notification fallbacks
+```
+
 ## Troubleshooting
 
 ### The terminal looks broken after exit
@@ -225,11 +326,11 @@ Run:
 reset
 ```
 
-Pomolife restores raw mode, alternate screen, mouse capture and cursor on normal exit. A terminal crash can still leave the shell in a bad state.
+pomoarc restores raw mode, alternate screen, mouse capture and cursor on normal exit. A terminal crash can still leave the shell in a bad state.
 
 ### Colors look wrong
 
-Use a modern terminal with truecolor support and try:
+Use a modern terminal with truecolor support:
 
 ```bash
 export COLORTERM=truecolor
@@ -253,12 +354,6 @@ pomolife notify --test
 pomolife sound test
 ```
 
-Install optional notification support:
-
-```bash
-brew install terminal-notifier
-```
-
 ### The ASCII font does not fit
 
 Use:
@@ -269,6 +364,9 @@ pomolife --font tiny
 
 ## Roadmap
 
+Next layers of polish:
+
+- Rename the binary from `pomolife` to `pomoarc` once the product name fully settles.
 - SQLite backend and migrations.
 - Full task picker and profile picker inside the TUI.
 - Ritual mode with energy check-in, intention and micro-journaling.
