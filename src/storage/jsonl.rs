@@ -77,6 +77,21 @@ impl JsonlStore {
         Ok(updated)
     }
 
+    pub fn complete_note(&self, id: u64) -> Result<Option<Note>> {
+        let mut notes = self.notes()?;
+        let mut completed = None;
+        for note in &mut notes {
+            if note.id == id {
+                note.completed = true;
+                note.updated_at = chrono::Local::now();
+                completed = Some(note.clone());
+                break;
+            }
+        }
+        self.write_jsonl(&self.notes_path(), &notes)?;
+        Ok(completed)
+    }
+
     pub fn delete_note(&self, id: u64) -> Result<bool> {
         let mut notes = self.notes()?;
         let before = notes.len();

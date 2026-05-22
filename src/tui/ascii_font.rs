@@ -5,11 +5,14 @@ pub const FONTS: &[&str] = &[
 ];
 
 pub fn render_time(value: &str, font: &str, max_width: u16) -> Vec<String> {
-    if max_width < 42 || matches!(font, "tiny" | "minimal") {
+    if max_width < 42 || font == "minimal" {
         return vec![value.to_string()];
     }
+    if font == "tiny" {
+        return vec![format!("‹ {value} ›")];
+    }
     if max_width >= 54 && matches!(font, "block" | "big" | "shadow" | "digital") {
-        return render_large(value);
+        return style_lines(render_large(value), font);
     }
     let glyphs = digital_glyphs();
     let mut lines = vec![
@@ -28,7 +31,27 @@ pub fn render_time(value: &str, font: &str, max_width: u16) -> Vec<String> {
             lines[index].push(' ');
         }
     }
-    lines
+    style_lines(lines, font)
+}
+
+fn style_lines(lines: Vec<String>, font: &str) -> Vec<String> {
+    match font {
+        "rounded" => lines
+            .into_iter()
+            .map(|line| line.replace('█', "●"))
+            .collect(),
+        "shadow" => lines.into_iter().map(|line| format!("{line}░")).collect(),
+        "slant" => lines
+            .into_iter()
+            .enumerate()
+            .map(|(index, line)| format!("{}{line}", " ".repeat(index)))
+            .collect(),
+        "big" => lines
+            .into_iter()
+            .map(|line| line.replace('█', "▓"))
+            .collect(),
+        _ => lines,
+    }
 }
 
 fn render_large(value: &str) -> Vec<String> {

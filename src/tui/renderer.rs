@@ -45,7 +45,7 @@ pub fn render(frame: &mut Frame, state: &mut UiState, snapshot: &TimerSnapshot) 
 
 fn render_header(frame: &mut Frame, state: &mut UiState, area: Rect) {
     let theme = state.theme();
-    let titles = ["Timer", "Tasks", "Notes", "Stats", "Settings"]
+    let titles = ["Timer", "Tasks", "Notes", "Stats", "Event", "Settings"]
         .into_iter()
         .map(|title| Line::from(format!("  {title}  ")))
         .collect::<Vec<_>>();
@@ -54,7 +54,8 @@ fn render_header(frame: &mut Frame, state: &mut UiState, area: Rect) {
         Tab::Tasks => 1,
         Tab::Notes => 2,
         Tab::Stats => 3,
-        Tab::Settings => 4,
+        Tab::Event => 4,
+        Tab::Settings => 5,
     };
     let tabs = Tabs::new(titles)
         .block(
@@ -73,7 +74,7 @@ fn render_header(frame: &mut Frame, state: &mut UiState, area: Rect) {
         );
     frame.render_widget(tabs, area);
 
-    let tab_width = area.width / 5;
+    let tab_width = area.width / 6;
     state.mouse_zones_mut().add(
         Rect::new(area.x, area.y, tab_width, area.height),
         MouseAction::Tab(Tab::Timer),
@@ -92,6 +93,10 @@ fn render_header(frame: &mut Frame, state: &mut UiState, area: Rect) {
     );
     state.mouse_zones_mut().add(
         Rect::new(area.x + tab_width * 4, area.y, tab_width, area.height),
+        MouseAction::Tab(Tab::Event),
+    );
+    state.mouse_zones_mut().add(
+        Rect::new(area.x + tab_width * 5, area.y, tab_width, area.height),
         MouseAction::Tab(Tab::Settings),
     );
 }
@@ -101,8 +106,9 @@ fn render_body(frame: &mut Frame, state: &mut UiState, snapshot: &TimerSnapshot,
         Tab::Timer => render_timer(frame, state, snapshot, area),
         Tab::Tasks => render_tasks(frame, state, area),
         Tab::Notes => render_notes(frame, state, area),
-        Tab::Stats => render_panel(frame, state, area, "Stats", "Run `pomoarc stats --json` for persisted stats.\nToday, streak, best hour and tag totals are stored locally."),
-        Tab::Settings => render_panel(frame, state, area, "Settings", "Config lives at `pomoarc config path`.\nHotkeys: t theme, a font, m tab, ? help.\nNotes: `pomoarc note add/list/edit/delete`."),
+        Tab::Stats => render_stats(frame, state, area),
+        Tab::Event => render_event(frame, state, area),
+        Tab::Settings => render_panel(frame, state, area, "Settings", "Config lives at `pomoarc config path`.\nHotkeys: t theme, a font, m tab, ? help.\nNotes: add, complete, edit, and delete from the Notes tab."),
     }
 }
 
@@ -324,11 +330,13 @@ fn render_notes(frame: &mut Frame, state: &mut UiState, area: Rect) {
             Constraint::Length(14),
             Constraint::Length(14),
             Constraint::Length(14),
+            Constraint::Length(14),
             Constraint::Min(10),
         ])
         .split(sections[0]);
     let button_specs = [
         ("Add note", MouseAction::AddNote, theme.accent),
+        ("Complete", MouseAction::CompleteNote, theme.accent),
         ("Edit latest", MouseAction::EditNote, theme.warning),
         ("Delete", MouseAction::DeleteNote, theme.danger),
     ];
@@ -359,6 +367,10 @@ fn render_notes(frame: &mut Frame, state: &mut UiState, area: Rect) {
             Span::raw("click Add note or press i"),
         ]),
         Line::from(vec![
+            Span::styled("complete ", Style::default().fg(theme.accent)),
+            Span::raw("click Complete or press c"),
+        ]),
+        Line::from(vec![
             Span::styled("edit ", Style::default().fg(theme.warning)),
             Span::raw("click Edit latest or press e"),
         ]),
@@ -371,15 +383,22 @@ fn render_notes(frame: &mut Frame, state: &mut UiState, area: Rect) {
 
     if state.notes().is_empty() {
         lines.push(Line::styled(
-            "No notes yet. Capture one from the CLI and reopen the TUI.",
+            "No notes yet. Press i or click Add note to capture one here.",
             Style::default().fg(theme.muted),
         ));
     } else {
         for note in state.notes() {
+            let marker = if note.completed { "[x]" } else { "[ ]" };
+            let style = if note.completed {
+                Style::default().fg(theme.muted)
+            } else {
+                Style::default().fg(theme.foreground)
+            };
             lines.push(Line::from(vec![
                 Span::styled("▸ ", Style::default().fg(theme.accent)),
                 Span::styled(format!("#{} ", note.id), Style::default().fg(theme.muted)),
-                Span::raw(note.body.as_str()),
+                Span::styled(format!("{marker} "), Style::default().fg(theme.accent)),
+                Span::styled(note.body.clone(), style),
             ]));
         }
     }
@@ -389,6 +408,135 @@ fn render_notes(frame: &mut Frame, state: &mut UiState, area: Rect) {
             .block(
                 Block::default()
                     .title("Notes")
+                    .borders(Borders::ALL)
+                    .border_style(Style::default().fg(theme.primary))
+                    .style(Style::default().bg(theme.background)),
+            )
+            .style(Style::default().fg(theme.foreground))
+            .wrap(Wrap { trim: true }),
+        sections[1],
+    );
+}
+
+fn render_stats(frame: &mut Frame, state: &UiState, area: Rect) {
+    let theme = state.theme();
+    let stats = state.stats();
+    let max_count = stats
+        .last_7_days
+        .iter()
+        .map(|day| day.count)
+        .max()
+        .unwrap_or(1)
+        .max(1);
+    let mut lines = vec![
+        Line::styled(
+            "Stats",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
+        Line::from(vec![
+            Span::styled("today ", Style::default().fg(theme.accent)),
+            Span::raw(format!(
+                "{} pomodoros · {} focus minutes",
+                stats.pomodoros_today, stats.focus_minutes_today
+            )),
+        ]),
+        Line::from(vec![
+            Span::styled("streak ", Style::default().fg(theme.warning)),
+            Span::raw(format!("{} days", stats.streak_days)),
+        ]),
+        Line::raw(""),
+        Line::styled("Last 7 days", Style::default().fg(theme.secondary)),
+    ];
+    for day in &stats.last_7_days {
+        let width = ((day.count * 18) / max_count).max(usize::from(day.count > 0));
+        lines.push(Line::from(vec![
+            Span::styled(
+                format!("{:>3} ", day.label),
+                Style::default().fg(theme.muted),
+            ),
+            Span::styled("█".repeat(width), Style::default().fg(theme.progress_full)),
+            Span::raw(format!(" {}", day.count)),
+        ]));
+    }
+    if let Some(hour) = stats.best_hour {
+        lines.push(Line::raw(""));
+        lines.push(Line::from(vec![
+            Span::styled("best hour ", Style::default().fg(theme.accent)),
+            Span::raw(format!("{hour:02}:00")),
+        ]));
+    }
+    frame.render_widget(
+        Paragraph::new(lines)
+            .block(
+                Block::default()
+                    .title("Stats")
+                    .borders(Borders::ALL)
+                    .border_style(Style::default().fg(theme.primary))
+                    .style(Style::default().bg(theme.background)),
+            )
+            .style(Style::default().fg(theme.foreground))
+            .wrap(Wrap { trim: true }),
+        area,
+    );
+}
+
+fn render_event(frame: &mut Frame, state: &mut UiState, area: Rect) {
+    let theme = state.theme();
+    let sections = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Length(3), Constraint::Min(5)])
+        .split(area);
+    let buttons = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Length(16), Constraint::Min(10)])
+        .split(sections[0]);
+    frame.render_widget(
+        Paragraph::new("Set event")
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .border_style(Style::default().fg(theme.accent))
+                    .style(Style::default().bg(theme.background)),
+            )
+            .style(
+                Style::default()
+                    .fg(theme.accent)
+                    .add_modifier(Modifier::BOLD),
+            )
+            .alignment(Alignment::Center),
+        buttons[0],
+    );
+    state
+        .mouse_zones_mut()
+        .add(buttons[0], MouseAction::AddEvent);
+    let text = vec![
+        Line::styled(
+            "Event countdown",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
+        Line::from(vec![
+            Span::styled("current ", Style::default().fg(theme.warning)),
+            Span::raw(state.event_status().to_string()),
+        ]),
+        Line::raw(""),
+        Line::from(vec![
+            Span::styled("format ", Style::default().fg(theme.accent)),
+            Span::raw("Launch | 2026-06-01 09:00"),
+        ]),
+        Line::from(vec![
+            Span::styled("use ", Style::default().fg(theme.accent)),
+            Span::raw("click Set event or press i"),
+        ]),
+    ];
+    frame.render_widget(
+        Paragraph::new(text)
+            .block(
+                Block::default()
+                    .title("Event")
                     .borders(Borders::ALL)
                     .border_style(Style::default().fg(theme.primary))
                     .style(Style::default().bg(theme.background)),
@@ -489,7 +637,7 @@ fn render_tasks(frame: &mut Frame, state: &mut UiState, area: Rect) {
 }
 
 fn render_help(frame: &mut Frame, area: Rect) {
-    let text = "Space pause/resume\ns start\nr reset\nn next phase\nq quit\n? help\nt theme\nm tab/mode\na ASCII font\ni add task/note in current tab\ne edit latest note\nx delete latest note\n+ add minute\n- remove minute\nTab next panel\nMouse: click buttons, tabs, and task rows";
+    let text = "Space pause/resume\ns start\nr reset\nn next phase\nq quit\n? help\nt theme\nm tab/mode\na ASCII font\ni add task/note/event in current tab\nc complete latest note\ne edit latest note\nx delete latest note\n+ add minute\n- remove minute\nTab next panel\nMouse: click buttons, tabs, and task rows";
     frame.render_widget(Clear, area);
     frame.render_widget(
         Paragraph::new(text)
@@ -506,6 +654,10 @@ fn render_input_modal(frame: &mut Frame, state: &UiState, area: Rect) {
         Some(InputMode::Task) => ("New task", "Type a task, Enter to save, Esc to cancel"),
         Some(InputMode::Note) => ("New note", "Type a note, Enter to save, Esc to cancel"),
         Some(InputMode::EditNote(_)) => ("Edit note", "Edit text, Enter to save, Esc to cancel"),
+        Some(InputMode::Event) => (
+            "Set event",
+            "Format: Event name | YYYY-MM-DD HH:MM, Enter to start countdown",
+        ),
         None => return,
     };
     frame.render_widget(Clear, area);

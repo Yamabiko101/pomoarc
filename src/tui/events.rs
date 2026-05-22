@@ -4,9 +4,6 @@ use std::time::Duration;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InputEvent {
-    Help,
-    AddMinute,
-    RemoveMinute,
     Tab,
     Enter,
     Backspace,
@@ -24,9 +21,6 @@ pub fn read() -> Result<InputEvent> {
     Ok(match event::read()? {
         Event::Key(key) if key.kind == KeyEventKind::Press => match key.code {
             KeyCode::Esc => InputEvent::Cancel,
-            KeyCode::Char('?') => InputEvent::Help,
-            KeyCode::Char('+') => InputEvent::AddMinute,
-            KeyCode::Char('-') => InputEvent::RemoveMinute,
             KeyCode::Enter => InputEvent::Enter,
             KeyCode::Backspace => InputEvent::Backspace,
             KeyCode::Tab => InputEvent::Tab,

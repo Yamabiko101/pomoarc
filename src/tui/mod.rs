@@ -17,6 +17,7 @@ use std::{io, time::Duration};
 
 use crate::{
     config::Config,
+    domain::stats::StatsSummary,
     domain::{note::Note, task::Task, timer::TimerSnapshot},
 };
 
@@ -64,6 +65,7 @@ pub enum Tab {
     Tasks,
     Notes,
     Stats,
+    Event,
     Settings,
 }
 
@@ -72,6 +74,7 @@ pub enum InputMode {
     Task,
     Note,
     EditNote(u64),
+    Event,
 }
 
 pub struct UiState {
@@ -79,6 +82,8 @@ pub struct UiState {
     task: Option<String>,
     tasks: Vec<Task>,
     notes: Vec<Note>,
+    stats: StatsSummary,
+    event_status: Option<String>,
     theme_index: usize,
     font_index: usize,
     frame: u64,
@@ -90,7 +95,13 @@ pub struct UiState {
 }
 
 impl UiState {
-    pub fn new(config: Config, task: Option<String>, tasks: Vec<Task>, notes: Vec<Note>) -> Self {
+    pub fn new(
+        config: Config,
+        task: Option<String>,
+        tasks: Vec<Task>,
+        notes: Vec<Note>,
+        stats: StatsSummary,
+    ) -> Self {
         let themes = Theme::catalog();
         let theme_index = themes
             .iter()
@@ -105,6 +116,8 @@ impl UiState {
             task,
             tasks,
             notes,
+            stats,
+            event_status: None,
             theme_index,
             font_index,
             frame: 0,
@@ -156,6 +169,16 @@ impl UiState {
         &self.notes
     }
 
+    pub fn stats(&self) -> &StatsSummary {
+        &self.stats
+    }
+
+    pub fn event_status(&self) -> &str {
+        self.event_status
+            .as_deref()
+            .unwrap_or("No event countdown configured")
+    }
+
     pub fn input_mode(&self) -> Option<&InputMode> {
         self.input_mode.as_ref()
     }
@@ -193,7 +216,8 @@ impl UiState {
             Tab::Timer => Tab::Tasks,
             Tab::Tasks => Tab::Notes,
             Tab::Notes => Tab::Stats,
-            Tab::Stats => Tab::Settings,
+            Tab::Stats => Tab::Event,
+            Tab::Event => Tab::Settings,
             Tab::Settings => Tab::Timer,
         };
     }
@@ -217,6 +241,11 @@ impl UiState {
 
     pub fn open_note_input(&mut self) {
         self.input_mode = Some(InputMode::Note);
+        self.input_buffer.clear();
+    }
+
+    pub fn open_event_input(&mut self) {
+        self.input_mode = Some(InputMode::Event);
         self.input_buffer.clear();
     }
 
@@ -255,6 +284,14 @@ impl UiState {
 
     pub fn set_notes(&mut self, notes: Vec<Note>) {
         self.notes = notes;
+    }
+
+    pub fn set_stats(&mut self, stats: StatsSummary) {
+        self.stats = stats;
+    }
+
+    pub fn set_event_status(&mut self, event_status: String) {
+        self.event_status = Some(event_status);
     }
 
     pub fn set_task(&mut self, task: Option<String>) {

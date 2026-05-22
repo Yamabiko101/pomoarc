@@ -3,7 +3,7 @@ use chrono::Local;
 use std::time::{Duration, Instant};
 
 use crate::{
-    cli::{NoteCommand, TaskCommand},
+    cli::{self, NoteCommand, TaskCommand},
     config::Config,
     domain::{
         session::SessionRecord,
@@ -66,10 +66,19 @@ pub fn handle_note(command: NoteCommand) -> Result<()> {
                 println!("No notes yet.");
             } else {
                 for note in notes {
-                    println!("#{} {}", note.id, note.body);
+                    println!(
+                        "#{} [{}] {}",
+                        note.id,
+                        if note.completed { "x" } else { " " },
+                        note.body
+                    );
                 }
             }
         }
+        NoteCommand::Complete { id } => match store.complete_note(id)? {
+            Some(note) => println!("Note #{} completed.", note.id),
+            None => println!("Note #{id} not found."),
+        },
         NoteCommand::Edit { id, body } => match store.update_note(id, body)? {
             Some(note) => println!("Note #{} updated.", note.id),
             None => println!("Note #{id} not found."),
@@ -94,8 +103,9 @@ fn run_engine(
     let store = JsonlStore::new(Config::data_dir()?.join("sessions.jsonl"));
     let tasks = store.tasks()?;
     let notes = latest_notes(&store)?;
+    let stats = store.stats()?;
     let mut terminal = tui::TerminalSession::enter(config.input.mouse)?;
-    let mut state = tui::UiState::new(config.clone(), task.clone(), tasks, notes);
+    let mut state = tui::UiState::new(config.clone(), task.clone(), tasks, notes, stats);
     let session_started_at = Local::now();
     let mut last_tick = Instant::now();
 
@@ -127,6 +137,17 @@ fn run_engine(
                                         let _ = store.update_note(id, value)?;
                                         state.set_notes(latest_notes(&store)?);
                                     }
+                                    tui::InputMode::Event => {
+                                        if let Some((name, at)) = parse_event_input(&value)? {
+                                            let label =
+                                                format!("{name} @ {}", at.format("%Y-%m-%d %H:%M"));
+                                            engine = TimerEngine::new(TimerMode::EventCountdown {
+                                                name,
+                                                at,
+                                            });
+                                            state.set_event_status(label);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -137,9 +158,6 @@ fn run_engine(
             }
 
             match event {
-                tui::events::InputEvent::AddMinute => engine.add_minute(),
-                tui::events::InputEvent::RemoveMinute => engine.remove_minute(),
-                tui::events::InputEvent::Help => state.toggle_help(),
                 tui::events::InputEvent::Tab => state.next_tab(),
                 tui::events::InputEvent::Enter => match state.tab() {
                     tui::Tab::Tasks => {
@@ -148,8 +166,12 @@ fn run_engine(
                         }
                     }
                     tui::Tab::Notes => state.open_note_input(),
+                    tui::Tab::Event => state.open_event_input(),
                     _ => {}
                 },
+                tui::events::InputEvent::Input('?') => state.toggle_help(),
+                tui::events::InputEvent::Input('+') => engine.add_minute(),
+                tui::events::InputEvent::Input('-') => engine.remove_minute(),
                 tui::events::InputEvent::Input('s') => engine.start(),
                 tui::events::InputEvent::Input(' ') => engine.toggle(),
                 tui::events::InputEvent::Input('r') => engine.reset(),
@@ -161,8 +183,15 @@ fn run_engine(
                 tui::events::InputEvent::Input('i') => match state.tab() {
                     tui::Tab::Tasks => state.open_task_input(),
                     tui::Tab::Notes => state.open_note_input(),
+                    tui::Tab::Event => state.open_event_input(),
                     _ => {}
                 },
+                tui::events::InputEvent::Input('c') if state.tab() == tui::Tab::Notes => {
+                    if let Some(note) = state.notes().first() {
+                        let _ = store.complete_note(note.id)?;
+                        state.set_notes(latest_notes(&store)?);
+                    }
+                }
                 tui::events::InputEvent::Input('e') if state.tab() == tui::Tab::Notes => {
                     state.open_edit_latest_note();
                 }
@@ -182,6 +211,12 @@ fn run_engine(
                     Some(MouseAction::Tab(tab)) => state.set_tab(tab),
                     Some(MouseAction::AddTask) => state.open_task_input(),
                     Some(MouseAction::AddNote) => state.open_note_input(),
+                    Some(MouseAction::CompleteNote) => {
+                        if let Some(note) = state.notes().first() {
+                            let _ = store.complete_note(note.id)?;
+                            state.set_notes(latest_notes(&store)?);
+                        }
+                    }
                     Some(MouseAction::EditNote) => state.open_edit_latest_note(),
                     Some(MouseAction::DeleteNote) => {
                         if let Some(note) = state.notes().first() {
@@ -194,6 +229,7 @@ fn run_engine(
                             state.set_task(Some(task.title.clone()));
                         }
                     }
+                    Some(MouseAction::AddEvent) => state.open_event_input(),
                     None => {}
                 },
                 tui::events::InputEvent::Cancel => break,
@@ -228,6 +264,7 @@ fn run_engine(
                     intention: None,
                     note: None,
                 })?;
+                state.set_stats(store.stats()?);
                 if config.notifications.enabled {
                     let _ = notifications::notify("pomoarc", "Session complete.");
                 }
@@ -239,6 +276,17 @@ fn run_engine(
     }
 
     Ok(())
+}
+
+fn parse_event_input(value: &str) -> Result<Option<(String, chrono::DateTime<Local>)>> {
+    let Some((name, at)) = value.split_once('|').or_else(|| value.split_once('@')) else {
+        return Ok(None);
+    };
+    let name = name.trim().to_string();
+    if name.is_empty() {
+        return Ok(None);
+    }
+    Ok(Some((name, cli::parse_event_time(at.trim())?)))
 }
 
 fn latest_notes(store: &JsonlStore) -> Result<Vec<crate::domain::note::Note>> {

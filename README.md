@@ -53,6 +53,7 @@ The project is designed around a dark workstation aesthetic: high contrast, shar
 | Input | Keyboard controls and basic mouse click zones |
 | In-TUI editing | Add tasks and notes directly from modal prompts |
 | Notes | Add, list, edit, and delete notes from the CLI |
+| Event countdown | Set an event countdown from inside the TUI |
 | Config | TOML config using platform app paths |
 | Storage | Local JSONL sessions, tasks, and notes |
 | Stats | Text summary and JSON export |
@@ -103,6 +104,7 @@ pomoarc task add "Read paper" --tag reading
 pomoarc task list
 pomoarc note add "Clarify scope before next focus block"
 pomoarc note list
+pomoarc note complete 1
 pomoarc note edit 1 "Clarify scope, then ship the fix"
 pomoarc note delete 1
 pomoarc themes list
@@ -129,6 +131,7 @@ pomoarc sound test
 | `m` | Next tab |
 | `a` | Next ASCII font |
 | `i` | Add task or note in the active tab |
+| `c` | Complete latest note |
 | `e` | Edit latest note |
 | `x` | Delete latest note |
 | `+` | Add 1 minute |
@@ -141,9 +144,10 @@ Mouse support is enabled by default when the terminal supports it.
 Clickable areas:
 
 - Footer controls: Start, Pause, Reset, Skip, Theme, Help.
-- Top tabs: Timer, Tasks, Notes, Stats, Settings.
+- Top tabs: Timer, Tasks, Notes, Stats, Event, Settings.
 - Task rows to activate a task.
 - Add/Edit/Delete buttons in Tasks and Notes.
+- Set Event button in the Event tab.
 
 Disable mouse input:
 
@@ -215,11 +219,22 @@ Future image slots:
 ```bash
 pomoarc note add "Refactor the timer panel"
 pomoarc note list
+pomoarc note complete 1
 pomoarc note edit 1 "Refactor timer panel and test small terminals"
 pomoarc note delete 1
 ```
 
-The TUI includes a Notes tab that shows your latest saved notes and the commands for editing them.
+The TUI includes a Notes tab with buttons for add, complete, edit, and delete.
+
+## Event Countdown
+
+Open the Event tab, click `Set event` or press `i`, then enter:
+
+```text
+Launch | 2026-06-01 09:00
+```
+
+The main timer switches into an event countdown without leaving the TUI.
 
 ## ASCII Fonts
 

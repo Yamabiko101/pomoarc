@@ -96,6 +96,7 @@ pub enum TaskCommand {
 pub enum NoteCommand {
     Add { body: String },
     List,
+    Complete { id: u64 },
     Edit { id: u64, body: String },
     Delete { id: u64 },
 }

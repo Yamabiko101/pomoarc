@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 pub struct Note {
     pub id: u64,
     pub body: String,
+    #[serde(default)]
+    pub completed: bool,
     pub created_at: DateTime<Local>,
     pub updated_at: DateTime<Local>,
 }
@@ -15,6 +17,7 @@ impl Note {
         Self {
             id,
             body,
+            completed: false,
             created_at: now,
             updated_at: now,
         }
