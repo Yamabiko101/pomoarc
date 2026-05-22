@@ -1,13 +1,13 @@
 [package]
-name = "pomolife"
+name = "pomoarc"
 version = "0.1.0"
 edition = "2021"
-description = "A lively Pomodoro TUI for focus sessions."
+description = "A dark terminal Pomodoro TUI for focus sessions."
 license = "MIT"
 repository = "https://github.com/Yamabiko101/pomoarc"
 
 [[bin]]
-name = "pomolife"
+name = "pomoarc"
 path = "src/main.rs"
 
 [dependencies]

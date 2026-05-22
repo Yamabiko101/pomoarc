@@ -49,7 +49,7 @@ fn main() -> Result<()> {
         Command::Task(command) => app::handle_task(command),
         Command::Notify { test } => {
             if test {
-                notifications::notify("Pomolife", "Notification fallback is working.")?;
+                notifications::notify("pomoarc", "Notification fallback is working.")?;
             }
             Ok(())
         }

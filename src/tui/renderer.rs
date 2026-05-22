@@ -85,9 +85,9 @@ fn render_header(frame: &mut Frame, state: &mut UiState, area: Rect) {
 fn render_body(frame: &mut Frame, state: &mut UiState, snapshot: &TimerSnapshot, area: Rect) {
     match state.tab() {
         Tab::Timer => render_timer(frame, state, snapshot, area),
-        Tab::Stats => render_panel(frame, state, area, "Stats", "Run `pomolife stats --json` for persisted stats.\nToday, streak, best hour and tag totals are stored locally."),
-        Tab::Tasks => render_panel(frame, state, area, "Tasks", "Use `pomolife task add \"Write README\" --tag writing`.\nThe TUI task selector is experimental in this release."),
-        Tab::Settings => render_panel(frame, state, area, "Settings", "Config lives at `pomolife config path`.\nHotkeys: t theme, a font, m tab, ? help."),
+        Tab::Stats => render_panel(frame, state, area, "Stats", "Run `pomoarc stats --json` for persisted stats.\nToday, streak, best hour and tag totals are stored locally."),
+        Tab::Tasks => render_panel(frame, state, area, "Tasks", "Use `pomoarc task add \"Write README\" --tag writing`.\nThe TUI task selector is experimental in this release."),
+        Tab::Settings => render_panel(frame, state, area, "Settings", "Config lives at `pomoarc config path`.\nHotkeys: t theme, a font, m tab, ? help."),
     }
 }
 
@@ -206,7 +206,7 @@ fn render_sidebar(frame: &mut Frame, state: &mut UiState, snapshot: &TimerSnapsh
         Paragraph::new(text)
             .block(
                 Block::default()
-                    .title("Pomolife")
+                    .title("pomoarc")
                     .borders(Borders::ALL)
                     .border_style(Style::default().fg(theme.border)),
             )

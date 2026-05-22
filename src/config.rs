@@ -204,11 +204,11 @@ impl Config {
     }
 
     fn project_dirs() -> Result<ProjectDirs> {
-        ProjectDirs::from("dev", "Pomolife", "pomolife")
+        ProjectDirs::from("dev", "Pomoarc", "pomoarc")
             .ok_or_else(|| anyhow!("could not determine project directories"))
     }
 
     fn env_home() -> Option<PathBuf> {
-        std::env::var_os("POMOLIFE_HOME").map(PathBuf::from)
+        std::env::var_os("POMOARC_HOME").map(PathBuf::from)
     }
 }

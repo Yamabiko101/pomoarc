@@ -1,1 +1,1 @@
-//! Review contracts for Pomolife's conceptual specialist agents live in docs.
+//! Review contracts for pomoarc's conceptual specialist agents live in docs.

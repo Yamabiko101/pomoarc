@@ -4,9 +4,9 @@ use clap::{Args, Parser, Subcommand};
 
 #[derive(Debug, Parser)]
 #[command(
-    name = "pomolife",
+    name = "pomoarc",
     version,
-    about = "A lively Pomodoro TUI for focus sessions"
+    about = "A dark terminal Pomodoro TUI for focus sessions"
 )]
 pub struct Cli {
     #[arg(long, global = true)]

@@ -29,6 +29,6 @@ pub fn play_sound() -> Result<()> {
             return Ok(());
         }
     }
-    println!("Sound unavailable; Pomolife will continue silently.");
+    println!("Sound unavailable; pomoarc will continue silently.");
     Ok(())
 }

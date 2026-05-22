@@ -114,7 +114,7 @@ fn run_engine(
                     note: None,
                 })?;
                 if config.notifications.enabled {
-                    let _ = notifications::notify("Pomolife", "Session complete.");
+                    let _ = notifications::notify("pomoarc", "Session complete.");
                 }
                 if config.notifications.sound {
                     let _ = notifications::play_sound();

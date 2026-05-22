@@ -1,4 +1,4 @@
-# Pomolife Review Contracts
+# pomoarc Review Contracts
 
 The project uses conceptual specialist reviews during development:
 

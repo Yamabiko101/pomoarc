@@ -2,15 +2,14 @@
 
 # pomoarc
 
-**A dark terminal focus system for people who tune their workstation like a living environment.**
+**A dark terminal Pomodoro system for focused work.**
 
-Omarchy-coded · terminal-native · keyboard-first · local-only · built in Rust
+Terminal-native · keyboard-first · local-only · built in Rust
 
 ![Rust](https://img.shields.io/badge/Rust-111111?style=for-the-badge&logo=rust&logoColor=white)
 ![Ratatui](https://img.shields.io/badge/Ratatui-7fbbb3?style=for-the-badge&labelColor=111111)
-![Omarchy](https://img.shields.io/badge/Omarchy-2d353b?style=for-the-badge&labelColor=111111&logoColor=a7c080)
 ![Terminal](https://img.shields.io/badge/Terminal-1e1e2e?style=for-the-badge&logo=gnometerminal&logoColor=a6e3a1)
-![Private Build](https://img.shields.io/badge/private_build-pomoarc-a6e3a1?style=for-the-badge&labelColor=111111)
+![Local First](https://img.shields.io/badge/Local_First-a6e3a1?style=for-the-badge&labelColor=111111)
 
 ```text
 ╭────────────────────────────── pomoarc ──────────────────────────────╮
@@ -24,124 +23,90 @@ Omarchy-coded · terminal-native · keyboard-first · local-only · built in Rus
 │      ██║     ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██║  ██║██║  ██║╚██████╗ │
 │      ╚═╝      ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ │
 │                                                                      │
-│                  25:00        scanline: soft                         │
+│                  25:00        signal: focus                          │
 │              [██████████████▓▓▓▓▒▒▒▒░░░░] 62%                       │
 │                                                                      │
 │   task       write the thing         state      locked in             │
-│   ritual     breathe / choose / ship  energy     steady               │
-│   garden     .  |  \|/  \|/_         signal     green                │
+│   garden     .  |  \|/  \|/_         rhythm     deep-work            │
 │   controls   s start · space pause · n skip · t theme · q quit       │
 ╰──────────────────────────────────────────────────────────────────────╯
 ```
 
-`pomolife` today. `pomoarc` as the product identity.
-
-[Install](#install) · [Themes](#theme-system) · [Controls](#controls) · [Visual Direction](#visual-direction) · [Roadmap](#roadmap)
+[Install](#install) · [Usage](#usage) · [Themes](#themes) · [Controls](#controls) · [Roadmap](#roadmap)
 
 </div>
 
-## Terminal Moodboard
+## Overview
 
-pomoarc should feel less like a calendar app and more like a tuned terminal rice:
+pomoarc is a terminal-first focus timer with a clean TUI, local configuration, keyboard control, mouse support where available, and persistent stats.
 
-```text
-black glass        #111111  ████████████████████  base
-everforest green   #a7c080  ████████████░░░░░░░░  growth
-terminal teal      #7fbbb3  ██████████████░░░░░░  focus
-signal pink        #f5c2e7  ████████░░░░░░░░░░░░  accent
-warning amber      #f9e2af  ██████████░░░░░░░░░░  break
-danger red         #f38ba8  ██████░░░░░░░░░░░░░░  skip
-```
+The project is designed around a dark workstation aesthetic: high contrast, sharp terminal borders, readable state, and subtle motion.
 
-Design language:
+## Current Status
 
-- **Omarchy first**: sharp borders, dark surfaces, terminal color, no soft landing-page gloss.
-- **Riced but useful**: visual detail only where it helps focus.
-- **Neon signal, not decoration**: progress, active state, warning, theme and completion.
-- **ASCII as atmosphere**: timer glyphs, garden frames, mascot states and subtle motion.
-- **Hackable private tool energy**: compact, opinionated, local, easy to fork.
-
-## Motion Language
-
-The README cannot animate the terminal, so this is the intended terminal pulse:
-
-```text
-tick 001  [██████████░░░░░░░░░░]  focus  signal: green
-tick 002  [██████████▓░░░░░░░░░]  focus  signal: green
-tick 003  [██████████▒▒░░░░░░░░]  focus  signal: green
-tick 004  [██████████░░░░░░░░░░]  focus  signal: green
-```
-
-Inside the app, animations are intentionally low-power and can be disabled:
-
-```bash
-pomolife --no-animations
-```
-
-## What Works Now
-
-| System | Current state |
+| Area | Status |
 | --- | --- |
-| TUI Pomodoro | Start, pause/resume, reset, skip, quit |
-| Terminal UI | Ratatui layout, ASCII timer, progress bar |
-| Keyboard | Full first-pass control map |
-| Mouse | Basic clickable tabs and footer controls |
+| Pomodoro TUI | Start, pause/resume, reset, skip, quit |
+| CLI | `start`, `tui`, `countdown`, `stopwatch`, `event`, `stats`, `config`, `themes`, `task`, `notify`, `sound` |
 | Themes | 10 built-in palettes |
 | Fonts | 8 font names with compact fallback |
-| Profiles | `default`, `deep-work`, `micro` |
-| Config | TOML, platform app path |
-| Storage | JSONL sessions and tasks |
-| Stats | Text and JSON summary |
-| macOS | Notifications and sound fallbacks |
+| Input | Keyboard controls and basic mouse click zones |
+| Config | TOML config using platform app paths |
+| Storage | Local JSONL sessions and tasks |
+| Stats | Text summary and JSON export |
+| macOS | Notification and sound fallbacks |
 
 Experimental:
 
-- TUI tabs for stats/tasks/settings are informational first versions.
+- Stats, tasks, and settings tabs inside the TUI are informational first versions.
 - Theme and font switching inside the TUI is session-local.
-- Focus Garden and mascot visuals are simple seeds, ready for richer animation.
-- SQLite, ritual mode, hooks and ambient backgrounds are next-phase work.
+- Focus Garden and mascot visuals are early visual seeds.
 
 ## Install
-
-From source:
 
 ```bash
 brew install rust
 git clone https://github.com/Yamabiko101/pomoarc.git
 cd pomoarc
 cargo install --path .
-pomolife
+pomoarc
 ```
 
-## Quick Use
+If the shell cannot find `pomoarc`, add Cargo's bin directory to your path:
 
 ```bash
-pomolife
-pomolife start
-pomolife start --profile deep-work --task "Write README"
-pomolife countdown 10m
-pomolife stopwatch
-pomolife event "Project delivery" --at "2026-06-01 09:00"
-pomolife stats
-pomolife stats --json
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+## Usage
+
+```bash
+pomoarc
+pomoarc start
+pomoarc start --profile deep-work --task "Write README"
+pomoarc countdown 10m
+pomoarc stopwatch
+pomoarc event "Project delivery" --at "2026-06-01 09:00"
+pomoarc stats
+pomoarc stats --json
 ```
 
 ## Command Map
 
 ```bash
-pomolife --help
-pomolife tui
-pomolife start --profile micro
-pomolife task add "Read paper" --tag reading
-pomolife task list
-pomolife themes list
-pomolife themes preview catppuccin-mocha
-pomolife themes set everforest-dark
-pomolife config path
-pomolife config get visual.theme
-pomolife config set timer.focus_minutes 50
-pomolife notify --test
-pomolife sound test
+pomoarc --help
+pomoarc tui
+pomoarc start --profile micro
+pomoarc task add "Read paper" --tag reading
+pomoarc task list
+pomoarc themes list
+pomoarc themes preview catppuccin-mocha
+pomoarc themes set everforest-dark
+pomoarc config path
+pomoarc config get visual.theme
+pomoarc config set timer.focus_minutes 50
+pomoarc notify --test
+pomoarc sound test
 ```
 
 ## Controls
@@ -176,25 +141,21 @@ Disable mouse input:
 mouse = false
 ```
 
-## Theme System
+## Themes
 
 Built-in palettes:
 
-| Family | Themes | Vibe |
+| Family | Themes | Use |
 | --- | --- | --- |
 | Gruvbox | `gruvbox-dark`, `gruvbox-light` | warm terminal classic |
-| Everforest | `everforest-dark`, `everforest-light` | Omarchy garden mode |
-| Catppuccin | `mocha`, `macchiato`, `frappe`, `latte` | soft neon workstation |
-| Utility | `monochrome`, `high-contrast` | no-distraction mode |
-
-Preview and set:
+| Everforest | `everforest-dark`, `everforest-light` | green, quiet, focused |
+| Catppuccin | `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `catppuccin-latte` | soft contrast |
+| Utility | `monochrome`, `high-contrast` | reduced distraction |
 
 ```bash
-pomolife themes preview catppuccin-mocha
-pomolife themes set everforest-dark
+pomoarc themes preview catppuccin-mocha
+pomoarc themes set everforest-dark
 ```
-
-Palette strip:
 
 ```text
 everforest-dark   bg #2d353b  fg #d3c6aa  primary #7fbbb3  grow #a7c080
@@ -203,17 +164,30 @@ gruvbox-dark      bg #282828  fg #ebdbb2  primary #83a598  grow #b8bb26
 high-contrast     bg #000000  fg #ffffff  primary #00ffff  grow #00ff00
 ```
 
-## Visual Direction
-
-Planned presentation layers for the TUI:
+## Visual System
 
 ```text
-╭─ focus surface ─────────────────────────────────────╮
-│  dense, dark, clear hierarchy                       │
-│  active region uses green/teal signal color          │
-│  breaks use amber, skips/errors use red              │
-│  optional low-power scanline/progress pulse          │
-╰─────────────────────────────────────────────────────╯
+black glass        #111111  ████████████████████  base
+everforest green   #a7c080  ████████████░░░░░░░░  growth
+terminal teal      #7fbbb3  ██████████████░░░░░░  focus
+signal pink        #f5c2e7  ████████░░░░░░░░░░░░  accent
+warning amber      #f9e2af  ██████████░░░░░░░░░░  break
+danger red         #f38ba8  ██████░░░░░░░░░░░░░░  skip
+```
+
+Motion target:
+
+```text
+tick 001  [██████████░░░░░░░░░░]  focus
+tick 002  [██████████▓░░░░░░░░░]  focus
+tick 003  [██████████▒▒░░░░░░░░]  focus
+tick 004  [██████████░░░░░░░░░░]  focus
+```
+
+Disable animations:
+
+```bash
+pomoarc --no-animations
 ```
 
 Future image slots:
@@ -238,17 +212,13 @@ Available font names:
 - `big`
 - `slant`
 
-Use:
-
 ```bash
-pomolife --font tiny
+pomoarc --font tiny
 ```
 
 Small terminals automatically fall back to a compact timer.
 
 ## Profiles
-
-Built-in focus rhythms:
 
 | Profile | Focus | Short break | Long break | Long break every |
 | --- | ---: | ---: | ---: | ---: |
@@ -257,30 +227,28 @@ Built-in focus rhythms:
 | `micro` | 10m | 2m | 8m | 5 |
 
 ```bash
-pomolife start --profile deep-work
+pomoarc start --profile deep-work
 ```
 
 ## Config
 
-Print the config path:
-
 ```bash
-pomolife config path
+pomoarc config path
 ```
 
-On macOS this uses the system application config directory through the `directories` crate. Commonly this resolves under:
+Common macOS path:
 
 ```text
-~/Library/Application Support/dev.Pomolife.pomolife/config.toml
+~/Library/Application Support/dev.Pomoarc.pomoarc/config.toml
 ```
 
 For isolated development or tests:
 
 ```bash
-POMOLIFE_HOME=.pomolife-dev pomolife config path
+POMOARC_HOME=.pomoarc-dev pomoarc config path
 ```
 
-Example values:
+Example:
 
 ```toml
 [visuals]
@@ -296,24 +264,14 @@ vim_keys = true
 
 ## Stats
 
-pomoarc stores sessions and tasks as JSONL in the platform data directory.
-
 ```bash
-pomolife stats
-pomolife stats --today
-pomolife stats --week
-pomolife stats --json
+pomoarc stats
+pomoarc stats --today
+pomoarc stats --week
+pomoarc stats --json
 ```
 
-Stats include:
-
-- Pomodoros completed today.
-- Focus minutes today.
-- Daily streak.
-- Best hour.
-- Most frequent task.
-- Tag totals.
-- Last 7 days as an ASCII chart.
+Stats include completed Pomodoros, focus minutes, streak, best hour, frequent task, tag totals, and a 7-day ASCII chart.
 
 ## macOS Notifications
 
@@ -326,8 +284,8 @@ Completion notifications try, in order:
 Sound uses `afplay` with system sounds.
 
 ```bash
-pomolife notify --test
-pomolife sound test
+pomoarc notify --test
+pomoarc sound test
 ```
 
 Optional:
@@ -365,25 +323,19 @@ src/
 
 ### The terminal looks broken after exit
 
-Run:
-
 ```bash
 reset
 ```
 
-pomoarc restores raw mode, alternate screen, mouse capture and cursor on normal exit. A terminal crash can still leave the shell in a bad state.
+pomoarc restores raw mode, alternate screen, mouse capture, and cursor on normal exit.
 
 ### Colors look wrong
-
-Use a modern terminal with truecolor support:
 
 ```bash
 export COLORTERM=truecolor
 ```
 
 ### Mouse does not work
-
-Mouse support depends on the terminal. Disable it with:
 
 ```toml
 [input]
@@ -392,27 +344,20 @@ mouse = false
 
 ### Notifications are silent
 
-Run:
-
 ```bash
-pomolife notify --test
-pomolife sound test
+pomoarc notify --test
+pomoarc sound test
 ```
 
 ### The ASCII font does not fit
 
-Use:
-
 ```bash
-pomolife --font tiny
+pomoarc --font tiny
 ```
 
 ## Roadmap
 
-Next layers of polish:
-
-- Rename the binary from `pomolife` to `pomoarc` once the product name fully settles.
-- Richer Omarchy-style ambient backgrounds: stars, rain, garden, scanline, matrix.
+- Richer ambient backgrounds: stars, rain, garden, scanline, matrix.
 - Animated focus garden states and sharper mascot frames.
 - SQLite backend and migrations.
 - Full task picker and profile picker inside the TUI.
