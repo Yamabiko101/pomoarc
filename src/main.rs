@@ -47,6 +47,7 @@ fn main() -> Result<()> {
         Command::Config(command) => handle_config(command, &mut config),
         Command::Themes(command) => handle_themes(command, &mut config),
         Command::Task(command) => app::handle_task(command),
+        Command::Note(command) => app::handle_note(command),
         Command::Notify { test } => {
             if test {
                 notifications::notify("pomoarc", "Notification fallback is working.")?;

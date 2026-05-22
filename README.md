@@ -47,12 +47,13 @@ The project is designed around a dark workstation aesthetic: high contrast, shar
 | Area | Status |
 | --- | --- |
 | Pomodoro TUI | Start, pause/resume, reset, skip, quit |
-| CLI | `start`, `tui`, `countdown`, `stopwatch`, `event`, `stats`, `config`, `themes`, `task`, `notify`, `sound` |
+| CLI | `start`, `tui`, `countdown`, `stopwatch`, `event`, `stats`, `config`, `themes`, `task`, `note`, `notify`, `sound` |
 | Themes | 10 built-in palettes |
 | Fonts | 8 font names with compact fallback |
 | Input | Keyboard controls and basic mouse click zones |
+| Notes | Add, list, edit, and delete notes from the CLI |
 | Config | TOML config using platform app paths |
-| Storage | Local JSONL sessions and tasks |
+| Storage | Local JSONL sessions, tasks, and notes |
 | Stats | Text summary and JSON export |
 | macOS | Notification and sound fallbacks |
 
@@ -99,6 +100,10 @@ pomoarc tui
 pomoarc start --profile micro
 pomoarc task add "Read paper" --tag reading
 pomoarc task list
+pomoarc note add "Clarify scope before next focus block"
+pomoarc note list
+pomoarc note edit 1 "Clarify scope, then ship the fix"
+pomoarc note delete 1
 pomoarc themes list
 pomoarc themes preview catppuccin-mocha
 pomoarc themes set everforest-dark
@@ -198,6 +203,17 @@ Future image slots:
 | `themes-strip.png` | Theme comparison |
 | `garden-states.png` | Focus Garden progression |
 | `compact-mode.png` | Small terminal fallback |
+
+## Notes
+
+```bash
+pomoarc note add "Refactor the timer panel"
+pomoarc note list
+pomoarc note edit 1 "Refactor timer panel and test small terminals"
+pomoarc note delete 1
+```
+
+The TUI includes a Notes tab that shows your latest saved notes and the commands for editing them.
 
 ## ASCII Fonts
 

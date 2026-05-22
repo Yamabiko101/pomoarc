@@ -3,7 +3,7 @@ use chrono::Local;
 use std::time::{Duration, Instant};
 
 use crate::{
-    cli::TaskCommand,
+    cli::{NoteCommand, TaskCommand},
     config::Config,
     domain::{
         session::SessionRecord,
@@ -52,15 +52,54 @@ pub fn handle_task(command: TaskCommand) -> Result<()> {
     Ok(())
 }
 
+pub fn handle_note(command: NoteCommand) -> Result<()> {
+    let store = JsonlStore::new(Config::data_dir()?.join("sessions.jsonl"));
+    match command {
+        NoteCommand::Add { body } => {
+            let note = store.add_note(body)?;
+            println!("Note #{} added.", note.id);
+        }
+        NoteCommand::List => {
+            let notes = store.notes()?;
+            if notes.is_empty() {
+                println!("No notes yet.");
+            } else {
+                for note in notes {
+                    println!("#{} {}", note.id, note.body);
+                }
+            }
+        }
+        NoteCommand::Edit { id, body } => match store.update_note(id, body)? {
+            Some(note) => println!("Note #{} updated.", note.id),
+            None => println!("Note #{id} not found."),
+        },
+        NoteCommand::Delete { id } => {
+            if store.delete_note(id)? {
+                println!("Note #{id} deleted.");
+            } else {
+                println!("Note #{id} not found.");
+            }
+        }
+    }
+    Ok(())
+}
+
 fn run_engine(
     config: Config,
     mut engine: TimerEngine,
     profile_name: Option<String>,
     task: Option<String>,
 ) -> Result<()> {
-    let mut terminal = tui::TerminalSession::enter(config.input.mouse)?;
-    let mut state = tui::UiState::new(config.clone(), task.clone());
     let store = JsonlStore::new(Config::data_dir()?.join("sessions.jsonl"));
+    let notes = store
+        .notes()?
+        .into_iter()
+        .rev()
+        .take(5)
+        .map(|note| format!("#{} {}", note.id, note.body))
+        .collect();
+    let mut terminal = tui::TerminalSession::enter(config.input.mouse)?;
+    let mut state = tui::UiState::new(config.clone(), task.clone(), notes);
     let session_started_at = Local::now();
     let mut last_tick = Instant::now();
 

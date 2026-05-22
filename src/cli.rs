@@ -46,6 +46,8 @@ pub enum Command {
     Themes(ThemesCommand),
     #[command(subcommand)]
     Task(TaskCommand),
+    #[command(subcommand)]
+    Note(NoteCommand),
     Notify {
         #[arg(long)]
         test: bool,
@@ -88,6 +90,14 @@ pub enum TaskCommand {
         tag: Option<String>,
     },
     List,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum NoteCommand {
+    Add { body: String },
+    List,
+    Edit { id: u64, body: String },
+    Delete { id: u64 },
 }
 
 #[derive(Debug, Subcommand)]

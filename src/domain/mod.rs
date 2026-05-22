@@ -1,3 +1,4 @@
+pub mod note;
 pub mod profile;
 pub mod session;
 pub mod stats;

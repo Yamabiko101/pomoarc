@@ -58,14 +58,15 @@ impl Drop for TerminalSession {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Tab {
     Timer,
+    Notes,
     Stats,
-    Tasks,
     Settings,
 }
 
 pub struct UiState {
     config: Config,
     task: Option<String>,
+    notes: Vec<String>,
     theme_index: usize,
     font_index: usize,
     frame: u64,
@@ -75,7 +76,7 @@ pub struct UiState {
 }
 
 impl UiState {
-    pub fn new(config: Config, task: Option<String>) -> Self {
+    pub fn new(config: Config, task: Option<String>, notes: Vec<String>) -> Self {
         let themes = Theme::catalog();
         let theme_index = themes
             .iter()
@@ -88,6 +89,7 @@ impl UiState {
         Self {
             config,
             task,
+            notes,
             theme_index,
             font_index,
             frame: 0,
@@ -129,6 +131,10 @@ impl UiState {
         self.task.as_deref().unwrap_or("No task selected")
     }
 
+    pub fn notes(&self) -> &[String] {
+        &self.notes
+    }
+
     pub fn frame(&self) -> u64 {
         self.frame
     }
@@ -155,9 +161,9 @@ impl UiState {
 
     pub fn next_tab(&mut self) {
         self.tab = match self.tab {
-            Tab::Timer => Tab::Stats,
-            Tab::Stats => Tab::Tasks,
-            Tab::Tasks => Tab::Settings,
+            Tab::Timer => Tab::Notes,
+            Tab::Notes => Tab::Stats,
+            Tab::Stats => Tab::Settings,
             Tab::Settings => Tab::Timer,
         };
     }
