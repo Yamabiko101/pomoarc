@@ -15,7 +15,10 @@ use crossterm::{
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
 
-use crate::{config::Config, domain::timer::TimerSnapshot};
+use crate::{
+    config::Config,
+    domain::{note::Note, task::Task, timer::TimerSnapshot},
+};
 
 use theme::Theme;
 
@@ -58,25 +61,36 @@ impl Drop for TerminalSession {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Tab {
     Timer,
+    Tasks,
     Notes,
     Stats,
     Settings,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum InputMode {
+    Task,
+    Note,
+    EditNote(u64),
+}
+
 pub struct UiState {
     config: Config,
     task: Option<String>,
-    notes: Vec<String>,
+    tasks: Vec<Task>,
+    notes: Vec<Note>,
     theme_index: usize,
     font_index: usize,
     frame: u64,
     show_help: bool,
     tab: Tab,
+    input_mode: Option<InputMode>,
+    input_buffer: String,
     mouse_zones: mouse::MouseZones,
 }
 
 impl UiState {
-    pub fn new(config: Config, task: Option<String>, notes: Vec<String>) -> Self {
+    pub fn new(config: Config, task: Option<String>, tasks: Vec<Task>, notes: Vec<Note>) -> Self {
         let themes = Theme::catalog();
         let theme_index = themes
             .iter()
@@ -89,12 +103,15 @@ impl UiState {
         Self {
             config,
             task,
+            tasks,
             notes,
             theme_index,
             font_index,
             frame: 0,
             show_help: false,
             tab: Tab::Timer,
+            input_mode: None,
+            input_buffer: String::new(),
             mouse_zones: mouse::MouseZones::default(),
         }
     }
@@ -131,8 +148,20 @@ impl UiState {
         self.task.as_deref().unwrap_or("No task selected")
     }
 
-    pub fn notes(&self) -> &[String] {
+    pub fn tasks(&self) -> &[Task] {
+        &self.tasks
+    }
+
+    pub fn notes(&self) -> &[Note] {
         &self.notes
+    }
+
+    pub fn input_mode(&self) -> Option<&InputMode> {
+        self.input_mode.as_ref()
+    }
+
+    pub fn input_buffer(&self) -> &str {
+        &self.input_buffer
     }
 
     pub fn frame(&self) -> u64 {
@@ -161,7 +190,8 @@ impl UiState {
 
     pub fn next_tab(&mut self) {
         self.tab = match self.tab {
-            Tab::Timer => Tab::Notes,
+            Tab::Timer => Tab::Tasks,
+            Tab::Tasks => Tab::Notes,
             Tab::Notes => Tab::Stats,
             Tab::Stats => Tab::Settings,
             Tab::Settings => Tab::Timer,
@@ -172,16 +202,62 @@ impl UiState {
         self.show_help = !self.show_help;
     }
 
-    pub fn handle_mouse(&mut self, x: u16, y: u16, engine: &mut crate::domain::timer::TimerEngine) {
-        match self.mouse_zones.hit(x, y) {
-            Some(mouse::MouseAction::Start) => engine.start(),
-            Some(mouse::MouseAction::Pause) => engine.toggle(),
-            Some(mouse::MouseAction::Reset) => engine.reset(),
-            Some(mouse::MouseAction::Skip) => engine.skip(),
-            Some(mouse::MouseAction::Theme) => self.next_theme(),
-            Some(mouse::MouseAction::Help) => self.toggle_help(),
-            Some(mouse::MouseAction::Tab(tab)) => self.tab = tab,
-            None => {}
+    pub fn mouse_action(&self, x: u16, y: u16) -> Option<mouse::MouseAction> {
+        self.mouse_zones.hit(x, y)
+    }
+
+    pub fn set_tab(&mut self, tab: Tab) {
+        self.tab = tab;
+    }
+
+    pub fn open_task_input(&mut self) {
+        self.input_mode = Some(InputMode::Task);
+        self.input_buffer.clear();
+    }
+
+    pub fn open_note_input(&mut self) {
+        self.input_mode = Some(InputMode::Note);
+        self.input_buffer.clear();
+    }
+
+    pub fn open_edit_latest_note(&mut self) {
+        if let Some(note) = self.notes.first() {
+            self.input_mode = Some(InputMode::EditNote(note.id));
+            self.input_buffer = note.body.clone();
         }
+    }
+
+    pub fn push_input(&mut self, ch: char) {
+        if self.input_mode.is_some() && !ch.is_control() {
+            self.input_buffer.push(ch);
+        }
+    }
+
+    pub fn pop_input(&mut self) {
+        self.input_buffer.pop();
+    }
+
+    pub fn cancel_input(&mut self) {
+        self.input_mode = None;
+        self.input_buffer.clear();
+    }
+
+    pub fn take_input(&mut self) -> Option<(InputMode, String)> {
+        let mode = self.input_mode.take()?;
+        let value = self.input_buffer.trim().to_string();
+        self.input_buffer.clear();
+        Some((mode, value))
+    }
+
+    pub fn set_tasks(&mut self, tasks: Vec<Task>) {
+        self.tasks = tasks;
+    }
+
+    pub fn set_notes(&mut self, notes: Vec<Note>) {
+        self.notes = notes;
+    }
+
+    pub fn set_task(&mut self, task: Option<String>) {
+        self.task = task;
     }
 }

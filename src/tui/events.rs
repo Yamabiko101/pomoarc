@@ -4,18 +4,14 @@ use std::time::Duration;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InputEvent {
-    Start,
-    PauseResume,
-    Reset,
-    Skip,
-    Quit,
     Help,
-    Theme,
-    Font,
-    Mode,
     AddMinute,
     RemoveMinute,
     Tab,
+    Enter,
+    Backspace,
+    Cancel,
+    Input(char),
     Mouse(u16, u16),
     None,
 }
@@ -27,18 +23,14 @@ pub fn poll(timeout: Duration) -> Result<bool> {
 pub fn read() -> Result<InputEvent> {
     Ok(match event::read()? {
         Event::Key(key) if key.kind == KeyEventKind::Press => match key.code {
-            KeyCode::Char('s') => InputEvent::Start,
-            KeyCode::Char(' ') => InputEvent::PauseResume,
-            KeyCode::Char('r') => InputEvent::Reset,
-            KeyCode::Char('n') => InputEvent::Skip,
-            KeyCode::Char('q') | KeyCode::Esc => InputEvent::Quit,
+            KeyCode::Esc => InputEvent::Cancel,
             KeyCode::Char('?') => InputEvent::Help,
-            KeyCode::Char('t') => InputEvent::Theme,
-            KeyCode::Char('a') => InputEvent::Font,
-            KeyCode::Char('m') => InputEvent::Mode,
             KeyCode::Char('+') => InputEvent::AddMinute,
             KeyCode::Char('-') => InputEvent::RemoveMinute,
+            KeyCode::Enter => InputEvent::Enter,
+            KeyCode::Backspace => InputEvent::Backspace,
             KeyCode::Tab => InputEvent::Tab,
+            KeyCode::Char(ch) => InputEvent::Input(ch),
             _ => InputEvent::None,
         },
         Event::Mouse(mouse) => match mouse.kind {

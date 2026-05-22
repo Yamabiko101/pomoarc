@@ -51,6 +51,7 @@ The project is designed around a dark workstation aesthetic: high contrast, shar
 | Themes | 10 built-in palettes |
 | Fonts | 8 font names with compact fallback |
 | Input | Keyboard controls and basic mouse click zones |
+| In-TUI editing | Add tasks and notes directly from modal prompts |
 | Notes | Add, list, edit, and delete notes from the CLI |
 | Config | TOML config using platform app paths |
 | Storage | Local JSONL sessions, tasks, and notes |
@@ -127,6 +128,9 @@ pomoarc sound test
 | `t` | Next theme |
 | `m` | Next tab |
 | `a` | Next ASCII font |
+| `i` | Add task or note in the active tab |
+| `e` | Edit latest note |
+| `x` | Delete latest note |
 | `+` | Add 1 minute |
 | `-` | Remove 1 minute |
 | `Tab` | Next panel |
@@ -137,7 +141,9 @@ Mouse support is enabled by default when the terminal supports it.
 Clickable areas:
 
 - Footer controls: Start, Pause, Reset, Skip, Theme, Help.
-- Top tabs: Timer, Stats, Tasks, Settings.
+- Top tabs: Timer, Tasks, Notes, Stats, Settings.
+- Task rows to activate a task.
+- Add/Edit/Delete buttons in Tasks and Notes.
 
 Disable mouse input:
 

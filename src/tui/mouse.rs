@@ -11,6 +11,11 @@ pub enum MouseAction {
     Theme,
     Help,
     Tab(Tab),
+    AddTask,
+    AddNote,
+    EditNote,
+    DeleteNote,
+    SelectTask(usize),
 }
 
 #[derive(Debug, Clone, Default)]

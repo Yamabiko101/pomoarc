@@ -13,6 +13,7 @@ use crate::{
     notifications,
     storage::JsonlStore,
     tui,
+    tui::mouse::MouseAction,
 };
 
 pub fn run_tui(config: Config, profile: Option<String>, task: Option<String>) -> Result<()> {
@@ -91,15 +92,10 @@ fn run_engine(
     task: Option<String>,
 ) -> Result<()> {
     let store = JsonlStore::new(Config::data_dir()?.join("sessions.jsonl"));
-    let notes = store
-        .notes()?
-        .into_iter()
-        .rev()
-        .take(5)
-        .map(|note| format!("#{} {}", note.id, note.body))
-        .collect();
+    let tasks = store.tasks()?;
+    let notes = latest_notes(&store)?;
     let mut terminal = tui::TerminalSession::enter(config.input.mouse)?;
-    let mut state = tui::UiState::new(config.clone(), task.clone(), notes);
+    let mut state = tui::UiState::new(config.clone(), task.clone(), tasks, notes);
     let session_started_at = Local::now();
     let mut last_tick = Instant::now();
 
@@ -108,20 +104,100 @@ fn run_engine(
         terminal.draw(&mut state, &snapshot)?;
 
         if tui::events::poll(Duration::from_millis(80))? {
-            match tui::events::read()? {
-                tui::events::InputEvent::Start => engine.start(),
-                tui::events::InputEvent::PauseResume => engine.toggle(),
-                tui::events::InputEvent::Reset => engine.reset(),
-                tui::events::InputEvent::Skip => engine.skip(),
+            let event = tui::events::read()?;
+            if state.input_mode().is_some() {
+                match event {
+                    tui::events::InputEvent::Input(ch) => state.push_input(ch),
+                    tui::events::InputEvent::Backspace => state.pop_input(),
+                    tui::events::InputEvent::Cancel => state.cancel_input(),
+                    tui::events::InputEvent::Enter => {
+                        if let Some((mode, value)) = state.take_input() {
+                            if !value.is_empty() {
+                                match mode {
+                                    tui::InputMode::Task => {
+                                        store.add_task(&Task::new(value.clone(), None))?;
+                                        state.set_tasks(store.tasks()?);
+                                        state.set_task(Some(value));
+                                    }
+                                    tui::InputMode::Note => {
+                                        store.add_note(value)?;
+                                        state.set_notes(latest_notes(&store)?);
+                                    }
+                                    tui::InputMode::EditNote(id) => {
+                                        let _ = store.update_note(id, value)?;
+                                        state.set_notes(latest_notes(&store)?);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+                continue;
+            }
+
+            match event {
                 tui::events::InputEvent::AddMinute => engine.add_minute(),
                 tui::events::InputEvent::RemoveMinute => engine.remove_minute(),
-                tui::events::InputEvent::Theme => state.next_theme(),
-                tui::events::InputEvent::Font => state.next_font(),
-                tui::events::InputEvent::Mode => state.next_tab(),
                 tui::events::InputEvent::Help => state.toggle_help(),
                 tui::events::InputEvent::Tab => state.next_tab(),
-                tui::events::InputEvent::Mouse(x, y) => state.handle_mouse(x, y, &mut engine),
-                tui::events::InputEvent::Quit => break,
+                tui::events::InputEvent::Enter => match state.tab() {
+                    tui::Tab::Tasks => {
+                        if let Some(task) = state.tasks().first() {
+                            state.set_task(Some(task.title.clone()));
+                        }
+                    }
+                    tui::Tab::Notes => state.open_note_input(),
+                    _ => {}
+                },
+                tui::events::InputEvent::Input('s') => engine.start(),
+                tui::events::InputEvent::Input(' ') => engine.toggle(),
+                tui::events::InputEvent::Input('r') => engine.reset(),
+                tui::events::InputEvent::Input('n') => engine.skip(),
+                tui::events::InputEvent::Input('q') => break,
+                tui::events::InputEvent::Input('t') => state.next_theme(),
+                tui::events::InputEvent::Input('a') => state.next_font(),
+                tui::events::InputEvent::Input('m') => state.next_tab(),
+                tui::events::InputEvent::Input('i') => match state.tab() {
+                    tui::Tab::Tasks => state.open_task_input(),
+                    tui::Tab::Notes => state.open_note_input(),
+                    _ => {}
+                },
+                tui::events::InputEvent::Input('e') if state.tab() == tui::Tab::Notes => {
+                    state.open_edit_latest_note();
+                }
+                tui::events::InputEvent::Input('x') if state.tab() == tui::Tab::Notes => {
+                    if let Some(note) = state.notes().first() {
+                        let _ = store.delete_note(note.id)?;
+                        state.set_notes(latest_notes(&store)?);
+                    }
+                }
+                tui::events::InputEvent::Mouse(x, y) => match state.mouse_action(x, y) {
+                    Some(MouseAction::Start) => engine.start(),
+                    Some(MouseAction::Pause) => engine.toggle(),
+                    Some(MouseAction::Reset) => engine.reset(),
+                    Some(MouseAction::Skip) => engine.skip(),
+                    Some(MouseAction::Theme) => state.next_theme(),
+                    Some(MouseAction::Help) => state.toggle_help(),
+                    Some(MouseAction::Tab(tab)) => state.set_tab(tab),
+                    Some(MouseAction::AddTask) => state.open_task_input(),
+                    Some(MouseAction::AddNote) => state.open_note_input(),
+                    Some(MouseAction::EditNote) => state.open_edit_latest_note(),
+                    Some(MouseAction::DeleteNote) => {
+                        if let Some(note) = state.notes().first() {
+                            let _ = store.delete_note(note.id)?;
+                            state.set_notes(latest_notes(&store)?);
+                        }
+                    }
+                    Some(MouseAction::SelectTask(index)) => {
+                        if let Some(task) = state.tasks().get(index) {
+                            state.set_task(Some(task.title.clone()));
+                        }
+                    }
+                    None => {}
+                },
+                tui::events::InputEvent::Cancel => break,
+                tui::events::InputEvent::Backspace | tui::events::InputEvent::Input(_) => {}
                 tui::events::InputEvent::None => {}
             }
         }
@@ -163,4 +239,11 @@ fn run_engine(
     }
 
     Ok(())
+}
+
+fn latest_notes(store: &JsonlStore) -> Result<Vec<crate::domain::note::Note>> {
+    let mut notes = store.notes()?;
+    notes.sort_by_key(|note| std::cmp::Reverse(note.updated_at));
+    notes.truncate(6);
+    Ok(notes)
 }
